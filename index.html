@@ -15,35 +15,25 @@
         <h1>Carlos</h1>
         <p>Comediante, Creador de Contenido y Productor Audiovisual</p>
 
-        <!-- Slider de QR -->
-        <div class="qr-slider-container">
+        <!-- Slider de QR Dinámico -->
+        <div class="qr-slider-container" id="contenedor-slider-general" style="display:none;">
             <h2>Escanea y Sígueme</h2>
-            
             <div class="qr-slider-viewport">
                 <div class="qr-slider-track" id="sliderTrack">
-                    
-                    <div class="slide">
-                        <h3 class="title-ig"><i class="fab fa-instagram"></i> Instagram</h3>
-                        <img src="qr-instagram.png" alt="QR Instagram" class="qr-code">
-                    </div>
-
-                    <div class="slide">
-                        <h3 class="title-tk"><i class="fab fa-tiktok"></i> TikTok</h3>
-                        <img src="qr-tiktok.png" alt="QR TikTok" class="qr-code">
-                    </div>
-
-                    <div class="slide">
-                        <h3 class="title-yt"><i class="fab fa-youtube"></i> YouTube</h3>
-                        <img src="qr-youtube.png" alt="QR YouTube" class="qr-code">
-                    </div>
-
+                    <!-- Los QR aparecerán aquí desde Firebase -->
                 </div>
             </div>
         </div>
 
-        <!-- CONTENEDOR DINÁMICO: Aquí aparecerán los botones de Firebase -->
-        <div class="links" id="contenedor-enlaces">
-            <!-- Cargando enlaces... -->
+        <!-- Redes Sociales Dinámicas -->
+        <div class="links" id="contenedor-redes">
+            <!-- Cargando redes... -->
+        </div>
+
+        <!-- Sección de Videos Dinámicos -->
+        <h2 style="font-size: 1.2rem; margin: 35px 0 15px 0; color: #444; border-bottom: 2px solid #ddd; padding-bottom: 5px;">Recomendados</h2>
+        <div class="links" id="contenedor-videos">
+            <!-- Cargando videos... -->
         </div>
     </div>
 
@@ -51,29 +41,12 @@
         <p>&copy; 2026 Carlos. Todos los derechos reservados.</p>
     </footer>
 
-    <!-- Script del Slider QR -->
-    <script>
-        const track = document.getElementById('sliderTrack');
-        const slides = document.querySelectorAll('.slide');
-        let currentIndex = 0;
-
-        function moveToNextSlide() {
-            currentIndex++;
-            if (currentIndex >= slides.length) {
-                currentIndex = 0; 
-            }
-            track.style.transform = `translateX(-${currentIndex * 100}%)`;
-        }
-
-        setInterval(moveToNextSlide, 3500);
-    </script>
-
-    <!-- Script de Conexión a Firebase para traer los enlaces -->
+    <!-- Script Principal -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // Tu configuración exacta de Firebase
+        // ⚠️ PEGA AQUÍ TU FIREBASE CONFIG EXACTA ⚠️
         const firebaseConfig = {
             apiKey: "AIzaSyCNyzguxQ8g3_xXRisuk01SKVaZ4H9JLxI",
             authDomain: "mis-enlaces-panel.firebaseapp.com",
@@ -87,33 +60,68 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        async function cargarEnlaces() {
-            const contenedor = document.getElementById('contenedor-enlaces');
+        // Función para renderizar botones normales (Redes o Videos)
+        function dibujarBotones(querySnapshot, contenedorId, estiloExtra = "") {
+            const contenedor = document.getElementById(contenedorId);
+            contenedor.innerHTML = ''; // Limpiar carga
             
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const boton = document.createElement('a');
+                boton.href = data.url;
+                boton.className = 'btn';
+                if(estiloExtra) boton.style.border = estiloExtra; // Para destacar los videos
+                boton.target = '_blank';
+                boton.innerHTML = `<i class="${data.icono}"></i> ${data.titulo}`;
+                contenedor.appendChild(boton);
+            });
+        }
+
+        // Cargar todo al inicio
+        async function cargarTodo() {
             try {
-                const q = query(collection(db, "enlaces"), orderBy("fecha", "desc"));
-                const querySnapshot = await getDocs(q);
+                // 1. Cargar Redes
+                const qRedes = query(collection(db, "redes"), orderBy("fecha", "desc"));
+                dibujarBotones(await getDocs(qRedes), 'contenedor-redes');
+
+                // 2. Cargar Videos
+                const qVideos = query(collection(db, "videos"), orderBy("fecha", "desc"));
+                dibujarBotones(await getDocs(qVideos), 'contenedor-videos', '2px solid #ff0000'); // Videos con borde rojo
+
+                // 3. Cargar QRs
+                const qQrs = query(collection(db, "qrs"), orderBy("fecha", "desc"));
+                const qrsSnapshot = await getDocs(qQrs);
+                const track = document.getElementById('sliderTrack');
                 
-                // Limpiamos el texto de "Cargando..."
-                contenedor.innerHTML = '';
-                
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const boton = document.createElement('a');
-                    boton.href = data.url;
-                    boton.className = 'btn';
-                    boton.target = '_blank';
-                    boton.innerHTML = `<i class="${data.icono}"></i> ${data.titulo}`;
-                    
-                    contenedor.appendChild(boton);
-                });
+                if(!qrsSnapshot.empty) {
+                    document.getElementById('contenedor-slider-general').style.display = 'block';
+                    qrsSnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        const slide = document.createElement('div');
+                        slide.className = 'slide';
+                        slide.innerHTML = `
+                            <h3 class="${data.colorClass}"><i class="${data.icono}"></i> ${data.titulo}</h3>
+                            <img src="${data.imagenUrl}" alt="QR" class="qr-code">
+                        `;
+                        track.appendChild(slide);
+                    });
+
+                    // Iniciar la animación del Slider solo si hay QRs cargados
+                    const slides = document.querySelectorAll('.slide');
+                    let currentIndex = 0;
+                    setInterval(() => {
+                        currentIndex++;
+                        if (currentIndex >= slides.length) currentIndex = 0; 
+                        track.style.transform = `translateX(-${currentIndex * 100}%)`;
+                    }, 3500);
+                }
+
             } catch (error) {
-                console.error("Error cargando los enlaces:", error);
-                contenedor.innerHTML = '<p>No hay enlaces disponibles por el momento.</p>';
+                console.error("Error conectando a Firebase:", error);
             }
         }
 
-        cargarEnlaces();
+        cargarTodo();
     </script>
 </body>
 </html>

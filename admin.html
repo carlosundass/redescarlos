@@ -3,20 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración</title>
+    <title>Panel de Administración VIP</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f7f6; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
-        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 400px; margin-bottom: 20px; }
-        input, button { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
-        button { background: #111; color: white; border: none; font-weight: bold; cursor: pointer; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 500px; margin-bottom: 20px; }
+        input, select, button { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        button { background: #111; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
         button:hover { background: #333; }
-        h2 { margin-top: 0; text-align: center; }
-        #admin-panel { display: none; }
+        .btn-red { background: #e50914; } .btn-red:hover { background: #b20710; }
+        .btn-qr { background: #8940FA; } .btn-qr:hover { background: #6b2ac4; }
+        h2 { margin-top: 0; text-align: center; font-size: 1.3rem; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        #admin-panel { display: none; width: 100%; max-width: 500px; }
     </style>
 </head>
 <body>
 
-    <!-- Pantalla de Login -->
+    <!-- Login -->
     <div class="card" id="login-box">
         <h2>Entrar al Panel</h2>
         <input type="email" id="email" placeholder="Tu correo">
@@ -24,26 +26,51 @@
         <button id="btnLogin">Ingresar</button>
     </div>
 
-    <!-- Panel de Control (Oculto hasta hacer login) -->
-    <div id="admin-panel" style="width: 100%; max-width: 400px;">
+    <!-- Panel de Control Completo -->
+    <div id="admin-panel">
+        
+        <!-- Sección 1: Redes Sociales -->
         <div class="card">
-            <h2>Agregar Nuevo Enlace</h2>
-            <input type="text" id="titulo" placeholder="Ej: Mi nuevo video de YouTube">
-            <input type="url" id="url" placeholder="Ej: https://youtube.com/...">
-            <input type="text" id="icono" placeholder="Ej: fab fa-youtube (Opcional)">
-            <button id="btnGuardar">Guardar Enlace</button>
-            <button id="btnLogout" style="background: #dc3545; margin-top: 10px;">Cerrar Sesión</button>
+            <h2>📱 Agregar Botón de Red Social</h2>
+            <input type="text" id="titulo-red" placeholder="Ej: Instagram">
+            <input type="url" id="url-red" placeholder="Ej: https://instagram.com/tu-perfil">
+            <input type="text" id="icono-red" placeholder="Ej: fab fa-instagram">
+            <button id="btnGuardarRed">Guardar Red Social</button>
         </div>
-        <p style="text-align:center; color:#666;">Los enlaces se actualizarán en tu web automáticamente.</p>
+
+        <!-- Sección 2: Videos Recomendados -->
+        <div class="card">
+            <h2>🎬 Agregar Enlace de Video</h2>
+            <input type="text" id="titulo-video" placeholder="Ej: Mi último Stand Up">
+            <input type="url" id="url-video" placeholder="Ej: https://youtube.com/tu-video">
+            <button id="btnGuardarVideo" class="btn-red">Guardar Video</button>
+        </div>
+
+        <!-- Sección 3: Códigos QR -->
+        <div class="card">
+            <h2>🔳 Actualizar/Agregar QR al Slider</h2>
+            <select id="color-qr">
+                <option value="title-ig">Color Instagram (Rosa)</option>
+                <option value="title-tk">Color TikTok (Negro)</option>
+                <option value="title-yt">Color YouTube (Rojo)</option>
+                <option value="title-pd">Color Podcast (Morado)</option>
+            </select>
+            <input type="text" id="titulo-qr" placeholder="Título (Ej: Escanea mi TikTok)">
+            <input type="url" id="icono-qr" placeholder="Icono (Ej: fab fa-tiktok)">
+            <input type="url" id="img-qr" placeholder="URL de la imagen del QR (Ej: https://tuhost.com/qr.png)">
+            <button id="btnGuardarQR" class="btn-qr">Guardar QR</button>
+        </div>
+
+        <button id="btnLogout" style="background: #dc3545; margin-top: 20px;">Cerrar Sesión</button>
     </div>
 
-    <!-- Conexión con Firebase -->
+    <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // Tu configuración exacta de Firebase
+        // ⚠️ PEGA AQUÍ TU FIREBASE CONFIG EXACTA ⚠️
         const firebaseConfig = {
             apiKey: "AIzaSyCNyzguxQ8g3_xXRisuk01SKVaZ4H9JLxI",
             authDomain: "mis-enlaces-panel.firebaseapp.com",
@@ -58,55 +85,53 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Lógica de Login
+        // Login / Logout
         document.getElementById('btnLogin').addEventListener('click', () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            signInWithEmailAndPassword(auth, email, password)
-                .then(() => alert("¡Bienvenido!"))
-                .catch(error => alert("Error: Verifica tus datos"));
+            signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value)
+                .then(() => alert("¡Bienvenido Carlos!"))
+                .catch(() => alert("Error en credenciales"));
         });
+        document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
 
-        // Lógica de Logout
-        document.getElementById('btnLogout').addEventListener('click', () => {
-            signOut(auth);
-        });
-
-        // Verificar si estás conectado para mostrar el panel
         onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById('login-box').style.display = 'none';
-                document.getElementById('admin-panel').style.display = 'block';
-            } else {
-                document.getElementById('login-box').style.display = 'block';
-                document.getElementById('admin-panel').style.display = 'none';
-            }
+            document.getElementById('login-box').style.display = user ? 'none' : 'block';
+            document.getElementById('admin-panel').style.display = user ? 'block' : 'none';
         });
 
-        // Guardar un nuevo enlace
-        document.getElementById('btnGuardar').addEventListener('click', async () => {
-            const titulo = document.getElementById('titulo').value;
-            const url = document.getElementById('url').value;
-            const icono = document.getElementById('icono').value || 'fas fa-link';
+        // Función reutilizable para guardar datos
+        async function guardarDato(coleccion, data, inputsLimpiar) {
+            try {
+                data.fecha = new Date(); // Agrega la fecha siempre
+                await addDoc(collection(db, coleccion), data);
+                alert("¡Guardado con éxito!");
+                inputsLimpiar.forEach(id => document.getElementById(id).value = '');
+            } catch (e) { alert("Error al guardar."); }
+        }
 
-            if(titulo && url) {
-                try {
-                    await addDoc(collection(db, "enlaces"), {
-                        titulo: titulo,
-                        url: url,
-                        icono: icono,
-                        fecha: new Date()
-                    });
-                    alert("¡Enlace guardado con éxito!");
-                    document.getElementById('titulo').value = '';
-                    document.getElementById('url').value = '';
-                    document.getElementById('icono').value = '';
-                } catch (e) {
-                    alert("Hubo un error al guardar.");
-                }
-            } else {
-                alert("Llena el título y la URL");
-            }
+        // Guardar Red
+        document.getElementById('btnGuardarRed').addEventListener('click', () => {
+            const titulo = document.getElementById('titulo-red').value;
+            const url = document.getElementById('url-red').value;
+            if(titulo && url) guardarDato("redes", { titulo, url, icono: document.getElementById('icono-red').value || 'fas fa-link' }, ['titulo-red', 'url-red', 'icono-red']);
+        });
+
+        // Guardar Video
+        document.getElementById('btnGuardarVideo').addEventListener('click', () => {
+            const titulo = document.getElementById('titulo-video').value;
+            const url = document.getElementById('url-video').value;
+            if(titulo && url) guardarDato("videos", { titulo, url, icono: 'fab fa-youtube' }, ['titulo-video', 'url-video']);
+        });
+
+        // Guardar QR
+        document.getElementById('btnGuardarQR').addEventListener('click', () => {
+            const titulo = document.getElementById('titulo-qr').value;
+            const imagenUrl = document.getElementById('img-qr').value;
+            if(titulo && imagenUrl) guardarDato("qrs", { 
+                titulo, 
+                imagenUrl, 
+                colorClass: document.getElementById('color-qr').value,
+                icono: document.getElementById('icono-qr').value || 'fas fa-qrcode'
+            }, ['titulo-qr', 'img-qr', 'icono-qr']);
         });
     </script>
 </body>
