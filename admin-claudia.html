@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Claudia</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: #ffe4e1; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 500px; margin-bottom: 20px; }
+        input, select, textarea, button { font-family: 'Poppins', sans-serif; width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 1rem; }
+        textarea { resize: vertical; min-height: 80px; }
+        button { background: #E1306C; color: white; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        button:hover { background: #b02352; }
+        .btn-red { background: #e50914; } .btn-red:hover { background: #b20710; }
+        .btn-qr { background: #8940FA; } .btn-qr:hover { background: #6b2ac4; }
+        .btn-perfil { background: #1e88e5; } .btn-perfil:hover { background: #1565c0; }
+        h2 { margin-top: 0; text-align: center; font-size: 1.3rem; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
+        #admin-panel { display: none; width: 100%; max-width: 500px; }
+        .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+        .item-lista span { display: flex; align-items: center; gap: 8px; font-weight: 500;}
+        .controles-lista { display: flex; gap: 5px; }
+        .btn-mover { background: #e0e0e0; color: #333; padding: 6px 10px; border-radius: 6px; width: auto; margin: 0; font-size: 0.9rem; }
+        .btn-mover:hover { background: #ccc; }
+        .btn-borrar { background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; width: auto; margin: 0; font-size: 0.8rem; }
+        .btn-borrar:hover { background: #cc0000; }
+        .contenedor-lista { margin-top: 20px; border-top: 2px dashed #eee; padding-top: 15px; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="card" id="login-box">
+        <h2>Panel de Claudia</h2>
+        <input type="email" id="email" placeholder="Correo maestro">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button id="btnLogin">Ingresar</button>
+    </div>
+
+    <div id="admin-panel">
+        
+        <div class="card">
+            <h2>👤 Perfil de Claudia</h2>
+            <input type="url" id="img-perfil" placeholder="URL de Foto (Ej: https://...)">
+            <input type="text" id="nombre-perfil" placeholder="Nombre o Título Principal">
+            <textarea id="desc-perfil" placeholder="Biografía o descripción"></textarea>
+            <button id="btnGuardarPerfil" class="btn-perfil">Actualizar Perfil</button>
+        </div>
+
+        <div class="card">
+            <h2>📱 Redes Sociales</h2>
+            <input type="text" id="titulo-red" placeholder="Título">
+            <input type="url" id="url-red" placeholder="URL">
+            <select id="icono-red">
+                <option value="fab fa-instagram">📸 Instagram</option>
+                <option value="fab fa-tiktok">🎵 TikTok</option>
+                <option value="fab fa-youtube">▶️ YouTube</option>
+                <option value="fab fa-spotify">🎧 Spotify</option>
+                <option value="fab fa-whatsapp">💬 WhatsApp</option>
+                <option value="fas fa-globe">🌐 Sitio Web</option>
+            </select>
+            <button id="btnGuardarRed">Guardar Red Social</button>
+            <div class="contenedor-lista" id="lista-redes"></div>
+        </div>
+
+        <div class="card">
+            <h2>🎬 Categorías (Videos, Shows)</h2>
+            <input type="text" id="titulo-video" placeholder="Título">
+            <input type="url" id="url-video" placeholder="URL">
+            <select id="icono-video">
+                <option value="fab fa-youtube">▶️ YouTube</option>
+                <option value="fas fa-ticket-alt">🎫 Entradas / Show</option>
+                <option value="fas fa-play-circle">⏯️ Video General</option>
+                <option value="fas fa-star">⭐ Destacado</option>
+            </select>
+            <button id="btnGuardarVideo" class="btn-red">Guardar Enlace</button>
+            <div class="contenedor-lista" id="lista-videos"></div>
+        </div>
+
+        <div class="card">
+            <h2>🔳 Códigos QR Adicionales</h2>
+            <select id="color-qr">
+                <option value="title-ig">Color Instagram (Rosa)</option>
+                <option value="title-tk">Color TikTok (Negro)</option>
+                <option value="title-pd">Color La Claketa (Morado)</option>
+            </select>
+            <input type="text" id="titulo-qr" placeholder="Título">
+            <select id="icono-qr">
+                <option value="fas fa-link">🔗 Enlace Genérico</option>
+            </select>
+            <input type="url" id="img-qr" placeholder="URL de la imagen del QR">
+            <button id="btnGuardarQR" class="btn-qr">Guardar QR Extra</button>
+            <div class="contenedor-lista" id="lista-qrs"></div>
+        </div>
+
+        <button id="btnLogout" style="background: #dc3545; margin-top: 20px;">Cerrar Sesión</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // ⚠️ PEGA AQUÍ TU FIREBASE CONFIG EXACTA ⚠️
+        const firebaseConfig = {
+            apiKey: "AIzaSyCNyzguxQ8g3_xXRisuk01SKVaZ4H9JLxI",
+            authDomain: "mis-enlaces-panel.firebaseapp.com",
+            projectId: "mis-enlaces-panel",
+            storageBucket: "mis-enlaces-panel.firebasestorage.app",
+            messagingSenderId: "27134948574",
+            appId: "1:27134948574:web:1d261e7ced5c7f9c9e7e4f",
+            measurementId: "G-FST917JFZ9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        document.getElementById('btnLogin').addEventListener('click', () => {
+            signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).catch(() => alert("Error en credenciales"));
+        });
+        document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
+
+        onAuthStateChanged(auth, (user) => {
+            document.getElementById('login-box').style.display = user ? 'none' : 'block';
+            document.getElementById('admin-panel').style.display = user ? 'block' : 'none';
+            if(user) { cargarListas(); cargarPerfilAdmin(); }
+        });
+
+        async function cargarPerfilAdmin() {
+            const docSnap = await getDoc(doc(db, "configuracion", "perfil_claudia"));
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                document.getElementById('img-perfil').value = data.foto || '';
+                document.getElementById('nombre-perfil').value = data.nombre || '';
+                document.getElementById('desc-perfil').value = data.descripcion || '';
+            }
+        }
+
+        document.getElementById('btnGuardarPerfil').addEventListener('click', async () => {
+            try {
+                await setDoc(doc(db, "configuracion", "perfil_claudia"), {
+                    foto: document.getElementById('img-perfil').value,
+                    nombre: document.getElementById('nombre-perfil').value,
+                    descripcion: document.getElementById('desc-perfil').value
+                });
+                alert("¡Perfil actualizado con éxito!");
+            } catch (error) { alert("Error al guardar."); }
+        });
+
+        async function fetchAndSort(coleccionStr) {
+            const snapshot = await getDocs(collection(db, coleccionStr));
+            const items = [];
+            snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
+            items.sort((a, b) => (a.orden ?? 999) - (b.orden ?? 999));
+            items.forEach((item, idx) => item.orden = idx);
+            return items;
+        }
+
+        async function guardarDato(coleccionStr, data, inputsLimpiar) {
+            try {
+                const itemsActuales = await fetchAndSort(coleccionStr);
+                data.orden = itemsActuales.length; 
+                data.fecha = new Date();
+                await addDoc(collection(db, coleccionStr), data);
+                inputsLimpiar.forEach(id => document.getElementById(id).value = '');
+                cargarListas(); 
+            } catch (e) { alert("Error al guardar."); }
+        }
+
+        document.getElementById('btnGuardarRed').addEventListener('click', () => {
+            const titulo = document.getElementById('titulo-red').value;
+            const url = document.getElementById('url-red').value;
+            if(titulo && url) guardarDato("redes_claudia", { titulo, url, icono: document.getElementById('icono-red').value }, ['titulo-red', 'url-red']);
+        });
+
+        document.getElementById('btnGuardarVideo').addEventListener('click', () => {
+            const titulo = document.getElementById('titulo-video').value;
+            const url = document.getElementById('url-video').value;
+            if(titulo && url) guardarDato("videos_claudia", { titulo, url, icono: document.getElementById('icono-video').value }, ['titulo-video', 'url-video']);
+        });
+
+        document.getElementById('btnGuardarQR').addEventListener('click', () => {
+            const titulo = document.getElementById('titulo-qr').value;
+            const imagenUrl = document.getElementById('img-qr').value;
+            if(titulo && imagenUrl) guardarDato("qrs_claudia", { titulo, imagenUrl, colorClass: document.getElementById('color-qr').value, icono: document.getElementById('icono-qr').value }, ['titulo-qr', 'img-qr']);
+        });
+
+        async function cargarListas() {
+            dibujarLista(await fetchAndSort("redes_claudia"), 'lista-redes', 'redes_claudia');
+            dibujarLista(await fetchAndSort("videos_claudia"), 'lista-videos', 'videos_claudia');
+            dibujarLista(await fetchAndSort("qrs_claudia"), 'lista-qrs', 'qrs_claudia');
+        }
+
+        function dibujarLista(items, contenedorId, coleccionStr) {
+            const contenedor = document.getElementById(contenedorId);
+            contenedor.innerHTML = '';
+            items.forEach((data, index) => {
+                const div = document.createElement('div');
+                div.className = 'item-lista';
+                div.innerHTML = `
+                    <span><i class="${data.icono}"></i> ${data.titulo}</span>
+                    <div class="controles-lista">
+                        ${index > 0 ? `<button class="btn-mover" data-id="${data.id}" data-swap-id="${items[index-1].id}" data-orden="${data.orden}" data-swap-orden="${items[index-1].orden}">⬆️</button>` : ''}
+                        ${index < items.length - 1 ? `<button class="btn-mover" data-id="${data.id}" data-swap-id="${items[index+1].id}" data-orden="${data.orden}" data-swap-orden="${items[index+1].orden}">⬇️</button>` : ''}
+                        <button class="btn-borrar" data-id="${data.id}">Borrar</button>
+                    </div>
+                `;
+                contenedor.appendChild(div);
+            });
+
+            contenedor.querySelectorAll('.btn-borrar').forEach(btn => btn.addEventListener('click', async (e) => {
+                if(confirm("¿Seguro?")) { await deleteDoc(doc(db, coleccionStr, e.target.getAttribute('data-id'))); cargarListas(); }
+            }));
+
+            contenedor.querySelectorAll('.btn-mover').forEach(btn => btn.addEventListener('click', async (e) => {
+                const id1 = e.target.getAttribute('data-id'); const id2 = e.target.getAttribute('data-swap-id');
+                const ord1 = Number(e.target.getAttribute('data-orden')); const ord2 = Number(e.target.getAttribute('data-swap-orden'));
+                await updateDoc(doc(db, coleccionStr, id1), { orden: ord2 }); await updateDoc(doc(db, coleccionStr, id2), { orden: ord1 });
+                cargarListas();
+            }));
+        }
+    </script>
+</body>
+</html>

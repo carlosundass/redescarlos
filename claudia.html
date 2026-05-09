@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claudia Aravena - Enlaces</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="container">
+        <!-- Elementos del perfil Dinámicos -->
+        <img src="claudia-perfil.jpg" alt="Foto de Claudia" class="profile-pic" id="display-foto">
+        <h1 id="display-nombre">Claudia</h1>
+        <p id="display-desc">Actriz y Coach Actoral</p>
+
+        <!-- Slider de QR -->
+        <div class="qr-slider-container" id="contenedor-slider-general">
+            <h2>Escanea y Sígueme</h2>
+            <div class="qr-slider-viewport">
+                <div class="qr-slider-track" id="sliderTrack">
+                    <!-- QRs Base Solicitados -->
+                    <div class="slide"><h3 class="title-ig"><i class="fab fa-instagram"></i> Instagram Claudia</h3><img src="qr-ig-claudia.png" alt="QR IG Claudia" class="qr-code"></div>
+                    <div class="slide"><h3 class="title-tk"><i class="fab fa-tiktok"></i> TikTok Claudia</h3><img src="qr-tk-claudia.png" alt="QR TK Claudia" class="qr-code"></div>
+                    <div class="slide"><h3 class="title-ig"><i class="fab fa-instagram"></i> Instagram La Claketa</h3><img src="qr-ig-claketa.png" alt="QR IG Claketa" class="qr-code"></div>
+                    <div class="slide"><h3 class="title-pd"><i class="fas fa-globe"></i> Web La Claketa</h3><img src="qr-web-claketa.png" alt="QR Web Claketa" class="qr-code"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIONES DINÁMICAS (Se ocultan si están vacías) -->
+        <h2 id="titulo-redes" class="seccion-titulo">Redes Sociales</h2>
+        <div class="links" id="contenedor-redes" style="margin-bottom: 15px;"></div>
+
+        <h2 id="titulo-destacado" class="seccion-titulo">⭐ Destacado</h2>
+        <div class="links" id="contenedor-destacado" style="margin-bottom: 15px;"></div>
+
+        <h2 id="titulo-youtube" class="seccion-titulo">▶️ YouTube</h2>
+        <div class="links" id="contenedor-youtube" style="margin-bottom: 15px;"></div>
+
+        <h2 id="titulo-shows" class="seccion-titulo">🎫 Shows y Entradas</h2>
+        <div class="links" id="contenedor-shows" style="margin-bottom: 15px;"></div>
+
+        <h2 id="titulo-videosgen" class="seccion-titulo">⏯️ Videos</h2>
+        <div class="links" id="contenedor-videosgen" style="margin-bottom: 15px;"></div>
+
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Claudia. Todos los derechos reservados.</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // ⚠️ PEGA AQUÍ TU FIREBASE CONFIG EXACTA ⚠️
+        const firebaseConfig = {
+            apiKey: "AIzaSyCNyzguxQ8g3_xXRisuk01SKVaZ4H9JLxI",
+            authDomain: "mis-enlaces-panel.firebaseapp.com",
+            projectId: "mis-enlaces-panel",
+            storageBucket: "mis-enlaces-panel.firebasestorage.app",
+            messagingSenderId: "27134948574",
+            appId: "1:27134948574:web:1d261e7ced5c7f9c9e7e4f",
+            measurementId: "G-FST917JFZ9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // OJO: Apunta al perfil de claudia
+        async function cargarPerfil() {
+            try {
+                const docSnap = await getDoc(doc(db, "configuracion", "perfil_claudia"));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if(data.foto) document.getElementById('display-foto').src = data.foto;
+                    if(data.nombre) document.getElementById('display-nombre').innerText = data.nombre;
+                    if(data.descripcion) document.getElementById('display-desc').innerText = data.descripcion;
+                }
+            } catch (error) { console.error("Error cargando perfil:", error); }
+        }
+
+        async function fetchAndSort(coleccionStr) {
+            const snapshot = await getDocs(collection(db, coleccionStr));
+            const items = [];
+            snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
+            items.sort((a, b) => (a.orden ?? 999) - (b.orden ?? 999));
+            return items;
+        }
+
+        function dibujarBotones(items, contenedorId, tituloId, estiloExtra = "") {
+            const contenedor = document.getElementById(contenedorId);
+            const titulo = document.getElementById(tituloId);
+            if (items.length > 0) {
+                titulo.style.display = 'block'; 
+                contenedor.innerHTML = ''; 
+                items.forEach((data) => {
+                    const boton = document.createElement('a');
+                    boton.href = data.url;
+                    boton.className = 'btn';
+                    if(estiloExtra) boton.style.border = estiloExtra; 
+                    boton.target = '_blank';
+                    boton.innerHTML = `<i class="${data.icono}"></i> ${data.titulo}`;
+                    contenedor.appendChild(boton);
+                });
+            } else {
+                titulo.style.display = 'none'; 
+            }
+        }
+
+        async function cargarTodo() {
+            await cargarPerfil(); 
+            try {
+                // OJO: Apuntando a las colecciones "_claudia"
+                const redes = await fetchAndSort("redes_claudia");
+                dibujarBotones(redes, 'contenedor-redes', 'titulo-redes');
+
+                const recomendadosFull = await fetchAndSort("videos_claudia");
+                
+                const destacados = recomendadosFull.filter(v => v.icono === "fas fa-star");
+                const youtube = recomendadosFull.filter(v => v.icono === "fab fa-youtube");
+                const shows = recomendadosFull.filter(v => v.icono === "fas fa-ticket-alt");
+                const videosGen = recomendadosFull.filter(v => v.icono === "fas fa-play-circle");
+
+                dibujarBotones(destacados, 'contenedor-destacado', 'titulo-destacado', '2px solid #FFD700'); 
+                dibujarBotones(youtube, 'contenedor-youtube', 'titulo-youtube', '2px solid #FF0000'); 
+                dibujarBotones(shows, 'contenedor-shows', 'titulo-shows', '2px solid #1e88e5'); 
+                dibujarBotones(videosGen, 'contenedor-videosgen', 'titulo-videosgen', '2px solid #555'); 
+
+                const qrsItems = await fetchAndSort("qrs_claudia");
+                const track = document.getElementById('sliderTrack');
+                if(qrsItems.length > 0) {
+                    qrsItems.forEach((data) => {
+                        const slide = document.createElement('div');
+                        slide.className = 'slide';
+                        slide.innerHTML = `<h3 class="${data.colorClass}"><i class="${data.icono}"></i> ${data.titulo}</h3><img src="${data.imagenUrl}" alt="QR" class="qr-code">`;
+                        track.appendChild(slide);
+                    });
+                }
+
+                const slides = document.querySelectorAll('.slide');
+                let currentIndex = 0;
+                setInterval(() => {
+                    currentIndex++;
+                    if (currentIndex >= slides.length) currentIndex = 0; 
+                    track.style.transform = `translateX(-${currentIndex * 100}%)`;
+                }, 3500);
+            } catch (error) { console.error("Error:", error); }
+        }
+        cargarTodo();
+    </script>
+</body>
+</html>
