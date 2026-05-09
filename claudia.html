@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Claudia Aravena - Enlaces</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -63,7 +63,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Apunta al perfil de claudia
         async function cargarPerfil() {
             try {
                 const docSnap = await getDoc(doc(db, "configuracion", "perfil_claudia"));
@@ -73,7 +72,7 @@
                     if(data.nombre) document.getElementById('display-nombre').innerText = data.nombre;
                     if(data.descripcion) document.getElementById('display-desc').innerText = data.descripcion;
                 }
-            } catch (error) { console.error("Error cargando perfil:", error); }
+            } catch (error) { console.error("Error:", error); }
         }
 
         async function fetchAndSort(coleccionStr) {
@@ -107,12 +106,10 @@
         async function cargarTodo() {
             await cargarPerfil(); 
             try {
-                // Apuntando a las colecciones "_claudia"
                 const redes = await fetchAndSort("redes_claudia");
                 dibujarBotones(redes, 'contenedor-redes', 'titulo-redes');
 
                 const recomendadosFull = await fetchAndSort("videos_claudia");
-                
                 const destacados = recomendadosFull.filter(v => v.icono === "fas fa-star");
                 const youtube = recomendadosFull.filter(v => v.icono === "fab fa-youtube");
                 const shows = recomendadosFull.filter(v => v.icono === "fas fa-ticket-alt");
@@ -123,7 +120,7 @@
                 dibujarBotones(shows, 'contenedor-shows', 'titulo-shows', '2px solid #1e88e5'); 
                 dibujarBotones(videosGen, 'contenedor-videosgen', 'titulo-videosgen', '2px solid #555'); 
 
-                // Si agrega QRs extras desde el panel, se suman al grid fijo en lugar de moverse
+                // Agregar QRs extra al grid
                 const qrsItems = await fetchAndSort("qrs_claudia");
                 const grid = document.getElementById('qrGrid');
                 if(qrsItems.length > 0) {
@@ -134,9 +131,6 @@
                         grid.appendChild(item);
                     });
                 }
-                
-                // NOTA: Eliminado el setInterval del slider. ¡Todo queda estático a la vista!
-
             } catch (error) { console.error("Error:", error); }
         }
         cargarTodo();
