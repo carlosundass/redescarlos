@@ -53,7 +53,7 @@ p {
 }
 
 /* =========================================
-   2. ESTILOS DEL SLIDER QR (Corregido)
+   2. ESTILOS DEL SLIDER QR
 ========================================= */
 .qr-slider-container {
     background-color: #fff;
@@ -76,7 +76,6 @@ p {
     width: 100%;
     overflow: hidden; 
     border-radius: 12px;
-    /* Agregamos padding para que la base del QR no se corte */
     padding-bottom: 15px; 
 }
 
@@ -92,7 +91,6 @@ p {
     flex-direction: column;
     align-items: center;
     gap: 15px;
-    /* Le damos espacio arriba y abajo para que respire */
     padding: 10px 0; 
 }
 
@@ -106,18 +104,18 @@ p {
 .title-ig { color: #E1306C; }
 .title-tk { color: #000000; }
 .title-yt { color: #FF0000; }
+.title-pd { color: #8940FA; }
 
-/* Ajuste vital para evitar cortes en el QR */
 .qr-code {
     width: 160px;
     height: auto;
-    aspect-ratio: 1 / 1; /* Forzamos que sea un cuadrado perfecto */
-    object-fit: contain; /* Asegura que la imagen no se desborde */
+    aspect-ratio: 1 / 1; 
+    object-fit: contain; 
     border-radius: 12px;
     border: 3px solid #f0f0f0;
     padding: 8px;
     background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Ajusté la sombra para que se note mejor */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
