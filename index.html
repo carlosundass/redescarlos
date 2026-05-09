@@ -10,7 +10,7 @@
 <body>
 
     <div class="container">
-        <!-- Textos e Imagen Dinámicos (IDs asignados para JS) -->
+        <!-- Elementos del perfil (ahora se actualizan desde Firebase) -->
         <img src="carlosundaprofile.jpg" alt="Foto de Perfil" class="profile-pic" id="display-foto">
         <h1 id="display-nombre">Carlos</h1>
         <p id="display-desc">Comediante, Creador de Contenido y Productor Audiovisual</p>
@@ -20,7 +20,7 @@
             <h2>Escanea y Sígueme</h2>
             <div class="qr-slider-viewport">
                 <div class="qr-slider-track" id="sliderTrack">
-                    <!-- QRs Base -->
+                    <!-- QRs Base (Estos 3 siempre estarán vivos) -->
                     <div class="slide"><h3 class="title-ig"><i class="fab fa-instagram"></i> Instagram</h3><img src="qr-instagram.png" alt="QR Instagram" class="qr-code"></div>
                     <div class="slide"><h3 class="title-tk"><i class="fab fa-tiktok"></i> TikTok</h3><img src="qr-tiktok.png" alt="QR TikTok" class="qr-code"></div>
                     <div class="slide"><h3 class="title-yt"><i class="fab fa-youtube"></i> YouTube</h3><img src="qr-youtube.png" alt="QR YouTube" class="qr-code"></div>
@@ -59,7 +59,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Cargar Perfil Dinámico
+        // 1. Cargar Perfil Dinámico
         async function cargarPerfil() {
             try {
                 const docSnap = await getDoc(doc(db, "configuracion", "perfil"));
@@ -74,6 +74,7 @@
             }
         }
 
+        // 2. Traer y Ordenar Enlaces
         async function fetchAndSort(coleccionStr) {
             const snapshot = await getDocs(collection(db, coleccionStr));
             const items = [];
@@ -82,12 +83,13 @@
             return items;
         }
 
+        // 3. Dibujar Botones y Mostrar/Ocultar Títulos (Lógica Inteligente)
         function dibujarBotones(items, contenedorId, tituloId, estiloExtra = "") {
             const contenedor = document.getElementById(contenedorId);
             const titulo = document.getElementById(tituloId);
             
             if (items.length > 0) {
-                titulo.style.display = 'block'; 
+                titulo.style.display = 'block'; // Muestra el título solo si hay items
                 contenedor.innerHTML = ''; 
                 items.forEach((data) => {
                     const boton = document.createElement('a');
@@ -99,20 +101,19 @@
                     contenedor.appendChild(boton);
                 });
             } else {
-                titulo.style.display = 'none'; 
+                titulo.style.display = 'none'; // Lo oculta si está vacío
             }
         }
 
+        // 4. Iniciar todo
         async function cargarTodo() {
-            await cargarPerfil(); // Llama al perfil antes de los botones
+            await cargarPerfil(); 
 
             try {
-                const redes = await fetchAndSort("redes");
-                dibujarBotones(redes, 'contenedor-redes', 'titulo-redes');
+                dibujarBotones(await fetchAndSort("redes"), 'contenedor-redes', 'titulo-redes');
+                dibujarBotones(await fetchAndSort("videos"), 'contenedor-videos', 'titulo-recomendados', '2px solid #333'); 
 
-                const videos = await fetchAndSort("videos");
-                dibujarBotones(videos, 'contenedor-videos', 'titulo-recomendados', '2px solid #333'); 
-
+                // Sumar QRs de Firebase al Slider
                 const qrsItems = await fetchAndSort("qrs");
                 const track = document.getElementById('sliderTrack');
                 if(qrsItems.length > 0) {
@@ -124,6 +125,7 @@
                     });
                 }
 
+                // INICIADOR DEL SLIDER REPARADO: Ahora se ejecuta siempre
                 const slides = document.querySelectorAll('.slide');
                 let currentIndex = 0;
                 setInterval(() => {
@@ -131,6 +133,7 @@
                     if (currentIndex >= slides.length) currentIndex = 0; 
                     track.style.transform = `translateX(-${currentIndex * 100}%)`;
                 }, 3500);
+
             } catch (error) {
                 console.error("Error:", error);
             }
