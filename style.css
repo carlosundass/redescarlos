@@ -204,7 +204,7 @@ footer {
 }
 
 .qr-item h3 {
-    font-size: 0.95rem; /* Letra un poco más pequeña para que quepan perfectos */
+    font-size: 0.95rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -215,13 +215,13 @@ footer {
 
 .qr-item .qr-code {
     width: 100%;
-    max-width: 130px; /* QR un poco más sutil */
+    max-width: 160px; /* Recuperamos un tamaño un poco más grande */
     height: auto;
 }
 
-/* En celulares muy pequeños, los pone uno debajo del otro para que no se rompan */
-@media (max-width: 360px) {
+/* CORREGIDO: Mobile en fila hacia abajo */
+@media (max-width: 480px) {
     .qr-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr; /* Una sola columna en celulares */
     }
 }
