@@ -21,13 +21,13 @@ body {
 }
 
 .container {
-    text-align: center; /* Centra todo el contenido base */
+    text-align: center;
     width: 100%;
     max-width: 450px;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Asegura el centrado de bloques */
+    align-items: center; 
 }
 
 .profile-pic {
@@ -41,10 +41,16 @@ body {
     transition: transform 0.3s ease;
 }
 
+.profile-pic:hover {
+    transform: scale(1.05);
+}
+
 h1 {
     font-size: 1.8rem;
     margin-bottom: 5px;
     font-weight: 700;
+    text-align: center; /* Centrado forzado */
+    width: 100%;
 }
 
 p {
@@ -52,6 +58,8 @@ p {
     color: #555;
     margin-bottom: 30px;
     font-weight: 400;
+    text-align: center; /* Centrado forzado */
+    width: 100%;
 }
 
 /* =========================================
@@ -63,7 +71,7 @@ p {
     padding: 20px;
     margin-bottom: 30px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    width: 100%; /* Ocupa el ancho del container */
+    width: 100%;
 }
 
 .qr-slider-container h2 {
@@ -105,9 +113,9 @@ p {
     color: #444; 
     border-bottom: 2px solid #ddd; 
     padding-bottom: 5px; 
-    text-align: center; /* Títulos de sección centrados */
+    text-align: center; 
     font-weight: 600;
-    display: none; /* Se activa por JS solo si hay contenido */
+    display: none; 
 }
 
 .links {
@@ -137,6 +145,7 @@ p {
     background-color: #111;
     color: #fff;
     transform: translateY(-4px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15);
 }
 
 footer {

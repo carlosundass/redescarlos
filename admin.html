@@ -8,15 +8,16 @@
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
         body { font-family: 'Poppins', sans-serif; background: #f4f7f6; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 500px; margin-bottom: 20px; }
-        input, select, button { font-family: 'Poppins', sans-serif; width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 1rem; }
+        input, select, textarea, button { font-family: 'Poppins', sans-serif; width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 1rem; }
+        textarea { resize: vertical; min-height: 80px; }
         button { background: #111; color: white; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; }
         button:hover { background: #333; }
         .btn-red { background: #e50914; } .btn-red:hover { background: #b20710; }
         .btn-qr { background: #8940FA; } .btn-qr:hover { background: #6b2ac4; }
+        .btn-perfil { background: #1e88e5; } .btn-perfil:hover { background: #1565c0; }
         h2 { margin-top: 0; text-align: center; font-size: 1.3rem; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
         #admin-panel { display: none; width: 100%; max-width: 500px; }
         
-        /* Lista y botones de orden */
         .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
         .item-lista span { display: flex; align-items: center; gap: 8px; font-weight: 500;}
         .controles-lista { display: flex; gap: 5px; }
@@ -39,6 +40,15 @@
 
     <div id="admin-panel">
         
+        <!-- Perfil Principal -->
+        <div class="card">
+            <h2>👤 Perfil Principal</h2>
+            <input type="url" id="img-perfil" placeholder="URL de tu Foto (Ej: https://...)">
+            <input type="text" id="nombre-perfil" placeholder="Tu Nombre o Título Principal">
+            <textarea id="desc-perfil" placeholder="Tu biografía o descripción"></textarea>
+            <button id="btnGuardarPerfil" class="btn-perfil">Actualizar Perfil</button>
+        </div>
+
         <!-- Redes Sociales -->
         <div class="card">
             <h2>📱 Redes Sociales</h2>
@@ -99,10 +109,9 @@
     </div>
 
     <script type="module">
-        // Importamos updateDoc para poder editar el orden
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         // ⚠️ PEGA AQUÍ TU FIREBASE CONFIG EXACTA ⚠️
         const firebaseConfig = {
@@ -119,7 +128,7 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // --- SISTEMA DE LOGIN ---
+        // Login
         document.getElementById('btnLogin').addEventListener('click', () => {
             signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value)
                 .catch(() => alert("Error en credenciales"));
@@ -129,29 +138,51 @@
         onAuthStateChanged(auth, (user) => {
             document.getElementById('login-box').style.display = user ? 'none' : 'block';
             document.getElementById('admin-panel').style.display = user ? 'block' : 'none';
-            if(user) cargarListas(); 
+            if(user) {
+                cargarListas(); 
+                cargarPerfilAdmin(); // Carga la info del perfil al entrar
+            }
         });
 
-        // --- FUNCIONES PARA LEER Y ORDENAR ---
-        // Trae los datos y los ordena por su número de orden
+        // --- GESTIÓN DE PERFIL ---
+        async function cargarPerfilAdmin() {
+            const docSnap = await getDoc(doc(db, "configuracion", "perfil"));
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                document.getElementById('img-perfil').value = data.foto || '';
+                document.getElementById('nombre-perfil').value = data.nombre || '';
+                document.getElementById('desc-perfil').value = data.descripcion || '';
+            }
+        }
+
+        document.getElementById('btnGuardarPerfil').addEventListener('click', async () => {
+            try {
+                await setDoc(doc(db, "configuracion", "perfil"), {
+                    foto: document.getElementById('img-perfil').value,
+                    nombre: document.getElementById('nombre-perfil').value,
+                    descripcion: document.getElementById('desc-perfil').value
+                });
+                alert("¡Perfil actualizado con éxito!");
+            } catch (error) {
+                alert("Error al guardar el perfil.");
+            }
+        });
+
+        // --- GESTIÓN DE ENLACES ---
         async function fetchAndSort(coleccionStr) {
             const snapshot = await getDocs(collection(db, coleccionStr));
             const items = [];
             snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
-            // Ordena. Si no tienen orden (los viejos), los manda al final
             items.sort((a, b) => (a.orden ?? 999) - (b.orden ?? 999));
-            // Forzamos asignar un orden limpio para evitar errores
             items.forEach((item, idx) => item.orden = idx);
             return items;
         }
 
-        // --- FUNCIONES PARA GUARDAR ---
         async function guardarDato(coleccionStr, data, inputsLimpiar) {
             try {
                 const itemsActuales = await fetchAndSort(coleccionStr);
-                data.orden = itemsActuales.length; // Lo pone al final de la lista
+                data.orden = itemsActuales.length; 
                 data.fecha = new Date();
-                
                 await addDoc(collection(db, coleccionStr), data);
                 inputsLimpiar.forEach(id => document.getElementById(id).value = '');
                 cargarListas(); 
@@ -176,7 +207,6 @@
             if(titulo && imagenUrl) guardarDato("qrs", { titulo, imagenUrl, colorClass: document.getElementById('color-qr').value, icono: document.getElementById('icono-qr').value }, ['titulo-qr', 'img-qr']);
         });
 
-        // --- RENDERIZAR LISTAS Y BOTONES DE MOVER ---
         async function cargarListas() {
             dibujarLista(await fetchAndSort("redes"), 'lista-redes', 'redes');
             dibujarLista(await fetchAndSort("videos"), 'lista-videos', 'videos');
@@ -186,7 +216,6 @@
         function dibujarLista(items, contenedorId, coleccionStr) {
             const contenedor = document.getElementById(contenedorId);
             contenedor.innerHTML = '';
-            
             items.forEach((data, index) => {
                 const div = document.createElement('div');
                 div.className = 'item-lista';
@@ -201,7 +230,6 @@
                 contenedor.appendChild(div);
             });
 
-            // Lógica para Borrar
             contenedor.querySelectorAll('.btn-borrar').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     const id = e.target.getAttribute('data-id');
@@ -212,15 +240,12 @@
                 });
             });
 
-            // Lógica para Mover (Arriba/Abajo)
             contenedor.querySelectorAll('.btn-mover').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     const id1 = e.target.getAttribute('data-id');
                     const id2 = e.target.getAttribute('data-swap-id');
                     const ord1 = Number(e.target.getAttribute('data-orden'));
                     const ord2 = Number(e.target.getAttribute('data-swap-orden'));
-
-                    // Intercambiamos los valores de orden en la base de datos
                     await updateDoc(doc(db, coleccionStr, id1), { orden: ord2 });
                     await updateDoc(doc(db, coleccionStr, id2), { orden: ord1 });
                     cargarListas();
