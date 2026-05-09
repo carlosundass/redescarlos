@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f7f6; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 400px; margin-bottom: 20px; }
+        input, button { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        button { background: #111; color: white; border: none; font-weight: bold; cursor: pointer; }
+        button:hover { background: #333; }
+        h2 { margin-top: 0; text-align: center; }
+        #admin-panel { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- Pantalla de Login -->
+    <div class="card" id="login-box">
+        <h2>Entrar al Panel</h2>
+        <input type="email" id="email" placeholder="Tu correo">
+        <input type="password" id="password" placeholder="Tu contraseña">
+        <button id="btnLogin">Ingresar</button>
+    </div>
+
+    <!-- Panel de Control (Oculto hasta hacer login) -->
+    <div id="admin-panel" style="width: 100%; max-width: 400px;">
+        <div class="card">
+            <h2>Agregar Nuevo Enlace</h2>
+            <input type="text" id="titulo" placeholder="Ej: Mi nuevo video de YouTube">
+            <input type="url" id="url" placeholder="Ej: https://youtube.com/...">
+            <input type="text" id="icono" placeholder="Ej: fab fa-youtube (Opcional)">
+            <button id="btnGuardar">Guardar Enlace</button>
+            <button id="btnLogout" style="background: #dc3545; margin-top: 10px;">Cerrar Sesión</button>
+        </div>
+        <p style="text-align:center; color:#666;">Los enlaces se actualizarán en tu web automáticamente.</p>
+    </div>
+
+    <!-- Conexión con Firebase -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // Tu configuración exacta de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCNyzguxQ8g3_xXRisuk01SKVaZ4H9JLxI",
+            authDomain: "mis-enlaces-panel.firebaseapp.com",
+            projectId: "mis-enlaces-panel",
+            storageBucket: "mis-enlaces-panel.firebasestorage.app",
+            messagingSenderId: "27134948574",
+            appId: "1:27134948574:web:1d261e7ced5c7f9c9e7e4f",
+            measurementId: "G-FST917JFZ9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Lógica de Login
+        document.getElementById('btnLogin').addEventListener('click', () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            signInWithEmailAndPassword(auth, email, password)
+                .then(() => alert("¡Bienvenido!"))
+                .catch(error => alert("Error: Verifica tus datos"));
+        });
+
+        // Lógica de Logout
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            signOut(auth);
+        });
+
+        // Verificar si estás conectado para mostrar el panel
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('login-box').style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'block';
+            } else {
+                document.getElementById('login-box').style.display = 'block';
+                document.getElementById('admin-panel').style.display = 'none';
+            }
+        });
+
+        // Guardar un nuevo enlace
+        document.getElementById('btnGuardar').addEventListener('click', async () => {
+            const titulo = document.getElementById('titulo').value;
+            const url = document.getElementById('url').value;
+            const icono = document.getElementById('icono').value || 'fas fa-link';
+
+            if(titulo && url) {
+                try {
+                    await addDoc(collection(db, "enlaces"), {
+                        titulo: titulo,
+                        url: url,
+                        icono: icono,
+                        fecha: new Date()
+                    });
+                    alert("¡Enlace guardado con éxito!");
+                    document.getElementById('titulo').value = '';
+                    document.getElementById('url').value = '';
+                    document.getElementById('icono').value = '';
+                } catch (e) {
+                    alert("Hubo un error al guardar.");
+                }
+            } else {
+                alert("Llena el título y la URL");
+            }
+        });
+    </script>
+</body>
+</html>

@@ -15,7 +15,7 @@
         <h1>Carlos</h1>
         <p>Comediante, Creador de Contenido y Productor Audiovisual</p>
 
-        <!-- Slider de QR Actualizado -->
+        <!-- Slider de QR -->
         <div class="qr-slider-container">
             <h2>Escanea y Sígueme</h2>
             
@@ -41,11 +41,9 @@
             </div>
         </div>
 
-        <!-- Enlaces Actualizados -->
-        <div class="links">
-            <a href="#" class="btn" target="_blank"><i class="fab fa-instagram"></i> Instagram</a>
-            <a href="#" class="btn" target="_blank"><i class="fab fa-tiktok"></i> TikTok</a>
-            <a href="#" class="btn" target="_blank"><i class="fab fa-youtube"></i> YouTube</a>
+        <!-- CONTENEDOR DINÁMICO: Aquí aparecerán los botones de Firebase -->
+        <div class="links" id="contenedor-enlaces">
+            <!-- Cargando enlaces... -->
         </div>
     </div>
 
@@ -53,6 +51,7 @@
         <p>&copy; 2026 Carlos. Todos los derechos reservados.</p>
     </footer>
 
+    <!-- Script del Slider QR -->
     <script>
         const track = document.getElementById('sliderTrack');
         const slides = document.querySelectorAll('.slide');
@@ -67,6 +66,54 @@
         }
 
         setInterval(moveToNextSlide, 3500);
+    </script>
+
+    <!-- Script de Conexión a Firebase para traer los enlaces -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // Tu configuración exacta de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCNyzguxQ8g3_xXRisuk01SKVaZ4H9JLxI",
+            authDomain: "mis-enlaces-panel.firebaseapp.com",
+            projectId: "mis-enlaces-panel",
+            storageBucket: "mis-enlaces-panel.firebasestorage.app",
+            messagingSenderId: "27134948574",
+            appId: "1:27134948574:web:1d261e7ced5c7f9c9e7e4f",
+            measurementId: "G-FST917JFZ9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function cargarEnlaces() {
+            const contenedor = document.getElementById('contenedor-enlaces');
+            
+            try {
+                const q = query(collection(db, "enlaces"), orderBy("fecha", "desc"));
+                const querySnapshot = await getDocs(q);
+                
+                // Limpiamos el texto de "Cargando..."
+                contenedor.innerHTML = '';
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const boton = document.createElement('a');
+                    boton.href = data.url;
+                    boton.className = 'btn';
+                    boton.target = '_blank';
+                    boton.innerHTML = `<i class="${data.icono}"></i> ${data.titulo}`;
+                    
+                    contenedor.appendChild(boton);
+                });
+            } catch (error) {
+                console.error("Error cargando los enlaces:", error);
+                contenedor.innerHTML = '<p>No hay enlaces disponibles por el momento.</p>';
+            }
+        }
+
+        cargarEnlaces();
     </script>
 </body>
 </html>
