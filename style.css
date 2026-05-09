@@ -203,6 +203,17 @@ footer {
     gap: 10px;
 }
 
+/* Enlace del QR */
+.qr-link {
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 0.3s ease;
+}
+
+.qr-link:hover {
+    opacity: 0.7;
+}
+
 .qr-item h3 {
     font-size: 0.95rem;
     display: flex;
@@ -215,13 +226,13 @@ footer {
 
 .qr-item .qr-code {
     width: 100%;
-    max-width: 160px; /* Recuperamos un tamaño un poco más grande */
+    max-width: 160px;
     height: auto;
 }
 
-/* CORREGIDO: Mobile en fila hacia abajo */
+/* Mobile en fila hacia abajo */
 @media (max-width: 480px) {
     .qr-grid {
-        grid-template-columns: 1fr; /* Una sola columna en celulares */
+        grid-template-columns: 1fr;
     }
 }

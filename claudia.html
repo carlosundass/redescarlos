@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Claudia Aravena Etchegaray - Enlaces</title>
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=4">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -17,10 +17,35 @@
         <div class="qr-slider-container">
             <h2>Escanea y Sígueme</h2>
             <div class="qr-grid" id="qrGrid">
-                <div class="qr-item"><h3 class="title-ig"><i class="fab fa-instagram"></i> Instagram Claudia</h3><img src="qr-ig-claudia.png" alt="QR IG Claudia" class="qr-code"></div>
-                <div class="qr-item"><h3 class="title-tk"><i class="fab fa-tiktok"></i> TikTok Claudia</h3><img src="qr-tk-claudia.png" alt="QR TK Claudia" class="qr-code"></div>
-                <div class="qr-item"><h3 class="title-ig"><i class="fab fa-instagram"></i> Instagram La Claketa</h3><img src="qr-ig-claketa.png" alt="QR IG Claketa" class="qr-code"></div>
-                <div class="qr-item"><h3 class="title-pd"><i class="fas fa-globe"></i> Web La Claketa</h3><img src="qr-web-claketa.png" alt="QR Web Claketa" class="qr-code"></div>
+                
+                <div class="qr-item">
+                    <a href="https://www.instagram.com/claudiaaravena/" target="_blank" class="qr-link">
+                        <h3 class="title-ig"><i class="fab fa-instagram"></i> Instagram Claudia</h3>
+                    </a>
+                    <img src="qr-ig-claudia.png" alt="QR IG Claudia" class="qr-code">
+                </div>
+
+                <div class="qr-item">
+                    <a href="https://www.tiktok.com/@claustandup" target="_blank" class="qr-link">
+                        <h3 class="title-tk"><i class="fab fa-tiktok"></i> TikTok Claudia</h3>
+                    </a>
+                    <img src="qr-tk-claudia.png" alt="QR TK Claudia" class="qr-code">
+                </div>
+
+                <div class="qr-item">
+                    <a href="https://www.instagram.com/laclaketacl" target="_blank" class="qr-link">
+                        <h3 class="title-ig"><i class="fab fa-instagram"></i> Instagram La Claketa</h3>
+                    </a>
+                    <img src="qr-ig-claketa.png" alt="QR IG Claketa" class="qr-code">
+                </div>
+
+                <div class="qr-item">
+                    <a href="https://laclaketa.cl/" target="_blank" class="qr-link">
+                        <h3 class="title-pd"><i class="fas fa-globe"></i> Web La Claketa</h3>
+                    </a>
+                    <img src="qr-web-claketa.png" alt="QR Web Claketa" class="qr-code">
+                </div>
+
             </div>
         </div>
 
@@ -49,6 +74,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+        // Configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCNyzguxQ8g3_xXRisuk01SKVaZ4H9JLxI",
             authDomain: "mis-enlaces-panel.firebaseapp.com",
@@ -71,7 +97,7 @@
                     if(data.nombre) document.getElementById('display-nombre').innerText = data.nombre;
                     if(data.descripcion) document.getElementById('display-desc').innerText = data.descripcion;
                 }
-            } catch (error) { console.error("Error:", error); }
+            } catch (error) { console.error("Error cargando perfil:", error); }
         }
 
         async function fetchAndSort(coleccionStr) {
@@ -118,11 +144,11 @@
                     qrsItems.forEach((data) => {
                         const item = document.createElement('div');
                         item.className = 'qr-item';
-                        item.innerHTML = `<h3 class="${data.colorClass}"><i class="${data.icono}"></i> ${data.titulo}</h3><img src="${data.imagenUrl}" alt="QR" class="qr-code">`;
+                        item.innerHTML = `<a href="${data.url || '#'}" target="_blank" class="qr-link"><h3 class="${data.colorClass}"><i class="${data.icono}"></i> ${data.titulo}</h3></a><img src="${data.imagenUrl}" alt="QR" class="qr-code">`;
                         grid.appendChild(item);
                     });
                 }
-            } catch (error) { console.error("Error:", error); }
+            } catch (error) { console.error("Error cargando enlaces:", error); }
         }
         cargarTodo();
     </script>
