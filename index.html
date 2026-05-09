@@ -10,7 +10,7 @@
 <body>
 
     <div class="container">
-        <!-- Elementos del perfil (ahora se actualizan desde Firebase) -->
+        <!-- Elementos del perfil Dinámicos -->
         <img src="carlosundaprofile.jpg" alt="Foto de Perfil" class="profile-pic" id="display-foto">
         <h1 id="display-nombre">Carlos</h1>
         <p id="display-desc">Comediante, Creador de Contenido y Productor Audiovisual</p>
@@ -20,7 +20,6 @@
             <h2>Escanea y Sígueme</h2>
             <div class="qr-slider-viewport">
                 <div class="qr-slider-track" id="sliderTrack">
-                    <!-- QRs Base (Estos 3 siempre estarán vivos) -->
                     <div class="slide"><h3 class="title-ig"><i class="fab fa-instagram"></i> Instagram</h3><img src="qr-instagram.png" alt="QR Instagram" class="qr-code"></div>
                     <div class="slide"><h3 class="title-tk"><i class="fab fa-tiktok"></i> TikTok</h3><img src="qr-tiktok.png" alt="QR TikTok" class="qr-code"></div>
                     <div class="slide"><h3 class="title-yt"><i class="fab fa-youtube"></i> YouTube</h3><img src="qr-youtube.png" alt="QR YouTube" class="qr-code"></div>
@@ -30,11 +29,24 @@
 
         <!-- SECCIÓN 1: REDES SOCIALES -->
         <h2 id="titulo-redes" class="seccion-titulo">Redes Sociales</h2>
-        <div class="links" id="contenedor-redes"></div>
+        <div class="links" id="contenedor-redes" style="margin-bottom: 15px;"></div>
 
-        <!-- SECCIÓN 2: RECOMENDADOS -->
-        <h2 id="titulo-recomendados" class="seccion-titulo">Recomendados</h2>
-        <div class="links" id="contenedor-videos"></div>
+        <!-- SECCIÓN 2: DESTACADOS -->
+        <h2 id="titulo-destacado" class="seccion-titulo">⭐ Destacado</h2>
+        <div class="links" id="contenedor-destacado" style="margin-bottom: 15px;"></div>
+
+        <!-- SECCIÓN 3: YOUTUBE -->
+        <h2 id="titulo-youtube" class="seccion-titulo">▶️ YouTube</h2>
+        <div class="links" id="contenedor-youtube" style="margin-bottom: 15px;"></div>
+
+        <!-- SECCIÓN 4: ENTRADAS / SHOWS -->
+        <h2 id="titulo-shows" class="seccion-titulo">🎫 Shows y Entradas</h2>
+        <div class="links" id="contenedor-shows" style="margin-bottom: 15px;"></div>
+
+        <!-- SECCIÓN 5: OTROS VIDEOS -->
+        <h2 id="titulo-videosgen" class="seccion-titulo">⏯️ Videos</h2>
+        <div class="links" id="contenedor-videosgen" style="margin-bottom: 15px;"></div>
+
     </div>
 
     <footer>
@@ -45,7 +57,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // ⚠️ PEGA AQUÍ TU FIREBASE CONFIG EXACTA ⚠️
         const firebaseConfig = {
             apiKey: "AIzaSyCNyzguxQ8g3_xXRisuk01SKVaZ4H9JLxI",
             authDomain: "mis-enlaces-panel.firebaseapp.com",
@@ -59,7 +70,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 1. Cargar Perfil Dinámico
         async function cargarPerfil() {
             try {
                 const docSnap = await getDoc(doc(db, "configuracion", "perfil"));
@@ -69,12 +79,9 @@
                     if(data.nombre) document.getElementById('display-nombre').innerText = data.nombre;
                     if(data.descripcion) document.getElementById('display-desc').innerText = data.descripcion;
                 }
-            } catch (error) {
-                console.error("Error cargando perfil:", error);
-            }
+            } catch (error) { console.error("Error cargando perfil:", error); }
         }
 
-        // 2. Traer y Ordenar Enlaces
         async function fetchAndSort(coleccionStr) {
             const snapshot = await getDocs(collection(db, coleccionStr));
             const items = [];
@@ -83,13 +90,12 @@
             return items;
         }
 
-        // 3. Dibujar Botones y Mostrar/Ocultar Títulos (Lógica Inteligente)
         function dibujarBotones(items, contenedorId, tituloId, estiloExtra = "") {
             const contenedor = document.getElementById(contenedorId);
             const titulo = document.getElementById(tituloId);
             
             if (items.length > 0) {
-                titulo.style.display = 'block'; // Muestra el título solo si hay items
+                titulo.style.display = 'block'; 
                 contenedor.innerHTML = ''; 
                 items.forEach((data) => {
                     const boton = document.createElement('a');
@@ -101,19 +107,33 @@
                     contenedor.appendChild(boton);
                 });
             } else {
-                titulo.style.display = 'none'; // Lo oculta si está vacío
+                titulo.style.display = 'none'; 
             }
         }
 
-        // 4. Iniciar todo
         async function cargarTodo() {
             await cargarPerfil(); 
 
             try {
-                dibujarBotones(await fetchAndSort("redes"), 'contenedor-redes', 'titulo-redes');
-                dibujarBotones(await fetchAndSort("videos"), 'contenedor-videos', 'titulo-recomendados', '2px solid #333'); 
+                // 1. Cargar Redes Normales
+                const redes = await fetchAndSort("redes");
+                dibujarBotones(redes, 'contenedor-redes', 'titulo-redes');
 
-                // Sumar QRs de Firebase al Slider
+                // 2. Traer todos los Recomendados y FILTRARLOS por su ícono
+                const recomendadosFull = await fetchAndSort("videos");
+                
+                const destacados = recomendadosFull.filter(v => v.icono === "fas fa-star");
+                const youtube = recomendadosFull.filter(v => v.icono === "fab fa-youtube");
+                const shows = recomendadosFull.filter(v => v.icono === "fas fa-ticket-alt");
+                const videosGen = recomendadosFull.filter(v => v.icono === "fas fa-play-circle");
+
+                // Dibujar cada categoría
+                dibujarBotones(destacados, 'contenedor-destacado', 'titulo-destacado', '2px solid #FFD700'); // Borde Dorado
+                dibujarBotones(youtube, 'contenedor-youtube', 'titulo-youtube', '2px solid #FF0000'); // Borde Rojo
+                dibujarBotones(shows, 'contenedor-shows', 'titulo-shows', '2px solid #1e88e5'); // Borde Azul
+                dibujarBotones(videosGen, 'contenedor-videosgen', 'titulo-videosgen', '2px solid #555'); // Borde Gris
+
+                // 3. Cargar QRs Dinámicos al Slider
                 const qrsItems = await fetchAndSort("qrs");
                 const track = document.getElementById('sliderTrack');
                 if(qrsItems.length > 0) {
@@ -125,7 +145,7 @@
                     });
                 }
 
-                // INICIADOR DEL SLIDER REPARADO: Ahora se ejecuta siempre
+                // 4. Iniciar Animación
                 const slides = document.querySelectorAll('.slide');
                 let currentIndex = 0;
                 setInterval(() => {

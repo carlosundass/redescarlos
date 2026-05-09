@@ -1,5 +1,5 @@
 /* =========================================
-   1. RESETEO Y BASE GENERAL (Poppins añadida)
+   1. RESETEO Y BASE GENERAL (Poppins)
 ========================================= */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
@@ -42,7 +42,6 @@ body {
     transform: scale(1.05);
 }
 
-/* Textos centrados y alineados */
 h1 {
     font-size: 1.8rem;
     margin-bottom: 5px;
@@ -67,11 +66,11 @@ p {
     padding-bottom: 5px; 
     text-align: center; 
     font-weight: 600;
-    display: none; /* Se oculta por defecto hasta que haya contenido */
+    display: none; /* Oculto hasta que Firebase traiga datos */
 }
 
 /* =========================================
-   2. ESTILOS DEL SLIDER QR (Corregido)
+   2. ESTILOS DEL SLIDER QR
 ========================================= */
 .qr-slider-container {
     background-color: #fff;
@@ -98,7 +97,6 @@ p {
     padding-bottom: 15px; 
 }
 
-/* RECUPERADO: El ancho 100% y la transición que hacen que el slider funcione */
 .qr-slider-track {
     display: flex;
     width: 100%;
@@ -127,7 +125,6 @@ p {
 .title-yt { color: #FF0000; }
 .title-pd { color: #8940FA; }
 
-/* RECUPERADO: Alto fijo para que no se deforme a gigante */
 .qr-code {
     width: 160px;
     height: 160px;
@@ -147,7 +144,7 @@ p {
 }
 
 /* =========================================
-   3. ESTILOS DE LOS BOTONES DE ENLACES
+   3. ESTILOS DE LOS BOTONES
 ========================================= */
 .links {
     display: flex;

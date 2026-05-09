@@ -70,9 +70,9 @@
             <div class="contenedor-lista" id="lista-redes"></div>
         </div>
 
-        <!-- Recomendados -->
+        <!-- Recomendados (Youtube, Entradas, etc) -->
         <div class="card">
-            <h2>🎬 Recomendados (Videos, Shows)</h2>
+            <h2>🎬 Categorías (Videos, Shows)</h2>
             <input type="text" id="titulo-video" placeholder="Título (Ej: Show en Vivo)">
             <input type="url" id="url-video" placeholder="URL del video o evento">
             <select id="icono-video">
@@ -81,7 +81,7 @@
                 <option value="fas fa-play-circle">⏯️ Video General</option>
                 <option value="fas fa-star">⭐ Destacado</option>
             </select>
-            <button id="btnGuardarVideo" class="btn-red">Guardar Recomendado</button>
+            <button id="btnGuardarVideo" class="btn-red">Guardar Enlace</button>
             <div class="contenedor-lista" id="lista-videos"></div>
         </div>
 
@@ -113,7 +113,6 @@
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // ⚠️ PEGA AQUÍ TU FIREBASE CONFIG EXACTA ⚠️
         const firebaseConfig = {
             apiKey: "AIzaSyCNyzguxQ8g3_xXRisuk01SKVaZ4H9JLxI",
             authDomain: "mis-enlaces-panel.firebaseapp.com",
@@ -128,7 +127,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Login
         document.getElementById('btnLogin').addEventListener('click', () => {
             signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value)
                 .catch(() => alert("Error en credenciales"));
@@ -144,7 +142,6 @@
             }
         });
 
-        // --- GESTIÓN DE PERFIL ---
         async function cargarPerfilAdmin() {
             const docSnap = await getDoc(doc(db, "configuracion", "perfil"));
             if (docSnap.exists()) {
@@ -163,12 +160,9 @@
                     descripcion: document.getElementById('desc-perfil').value
                 });
                 alert("¡Perfil actualizado con éxito!");
-            } catch (error) {
-                alert("Error al guardar el perfil.");
-            }
+            } catch (error) { alert("Error al guardar el perfil."); }
         });
 
-        // --- GESTIÓN DE ENLACES ---
         async function fetchAndSort(coleccionStr) {
             const snapshot = await getDocs(collection(db, coleccionStr));
             const items = [];
