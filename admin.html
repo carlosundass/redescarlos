@@ -5,19 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración VIP</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f7f6; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; background: #f4f7f6; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; }
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 500px; margin-bottom: 20px; }
-        input, select, button { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 1rem; }
-        button { background: #111; color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        input, select, button { font-family: 'Poppins', sans-serif; width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; font-size: 1rem; }
+        button { background: #111; color: white; border: none; font-weight: 600; cursor: pointer; transition: 0.3s; }
         button:hover { background: #333; }
         .btn-red { background: #e50914; } .btn-red:hover { background: #b20710; }
         .btn-qr { background: #8940FA; } .btn-qr:hover { background: #6b2ac4; }
         h2 { margin-top: 0; text-align: center; font-size: 1.3rem; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
         #admin-panel { display: none; width: 100%; max-width: 500px; }
         
-        /* Estilos para la lista de borrar */
+        /* Lista y botones de orden */
         .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
         .item-lista span { display: flex; align-items: center; gap: 8px; font-weight: 500;}
+        .controles-lista { display: flex; gap: 5px; }
+        .btn-mover { background: #e0e0e0; color: #333; padding: 6px 10px; border-radius: 6px; width: auto; margin: 0; font-size: 0.9rem; }
+        .btn-mover:hover { background: #ccc; }
         .btn-borrar { background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; width: auto; margin: 0; font-size: 0.8rem; }
         .btn-borrar:hover { background: #cc0000; }
         .contenedor-lista { margin-top: 20px; border-top: 2px dashed #eee; padding-top: 15px; }
@@ -35,11 +39,11 @@
 
     <div id="admin-panel">
         
+        <!-- Redes Sociales -->
         <div class="card">
             <h2>📱 Redes Sociales</h2>
             <input type="text" id="titulo-red" placeholder="Título (Ej: Mi Instagram)">
             <input type="url" id="url-red" placeholder="URL (Ej: https://instagram.com/...)">
-            
             <select id="icono-red">
                 <option value="fab fa-instagram">📸 Instagram</option>
                 <option value="fab fa-tiktok">🎵 TikTok</option>
@@ -52,12 +56,11 @@
                 <option value="fas fa-globe">🌐 Sitio Web</option>
                 <option value="fas fa-camera">📷 Fotografía</option>
             </select>
-            
             <button id="btnGuardarRed">Guardar Red Social</button>
-            
             <div class="contenedor-lista" id="lista-redes"></div>
         </div>
 
+        <!-- Recomendados -->
         <div class="card">
             <h2>🎬 Recomendados (Videos, Shows)</h2>
             <input type="text" id="titulo-video" placeholder="Título (Ej: Show en Vivo)">
@@ -69,10 +72,10 @@
                 <option value="fas fa-star">⭐ Destacado</option>
             </select>
             <button id="btnGuardarVideo" class="btn-red">Guardar Recomendado</button>
-            
             <div class="contenedor-lista" id="lista-videos"></div>
         </div>
 
+        <!-- QRs -->
         <div class="card">
             <h2>🔳 Códigos QR Adicionales</h2>
             <select id="color-qr">
@@ -89,7 +92,6 @@
             </select>
             <input type="url" id="img-qr" placeholder="URL de la imagen del QR">
             <button id="btnGuardarQR" class="btn-qr">Guardar QR Extra</button>
-
             <div class="contenedor-lista" id="lista-qrs"></div>
         </div>
 
@@ -97,11 +99,12 @@
     </div>
 
     <script type="module">
+        // Importamos updateDoc para poder editar el orden
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // Tu configuración guardada en memoria
+        // ⚠️ PEGA AQUÍ TU FIREBASE CONFIG EXACTA ⚠️
         const firebaseConfig = {
             apiKey: "AIzaSyCNyzguxQ8g3_xXRisuk01SKVaZ4H9JLxI",
             authDomain: "mis-enlaces-panel.firebaseapp.com",
@@ -129,11 +132,27 @@
             if(user) cargarListas(); 
         });
 
+        // --- FUNCIONES PARA LEER Y ORDENAR ---
+        // Trae los datos y los ordena por su número de orden
+        async function fetchAndSort(coleccionStr) {
+            const snapshot = await getDocs(collection(db, coleccionStr));
+            const items = [];
+            snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
+            // Ordena. Si no tienen orden (los viejos), los manda al final
+            items.sort((a, b) => (a.orden ?? 999) - (b.orden ?? 999));
+            // Forzamos asignar un orden limpio para evitar errores
+            items.forEach((item, idx) => item.orden = idx);
+            return items;
+        }
+
         // --- FUNCIONES PARA GUARDAR ---
-        async function guardarDato(coleccion, data, inputsLimpiar) {
+        async function guardarDato(coleccionStr, data, inputsLimpiar) {
             try {
+                const itemsActuales = await fetchAndSort(coleccionStr);
+                data.orden = itemsActuales.length; // Lo pone al final de la lista
                 data.fecha = new Date();
-                await addDoc(collection(db, coleccion), data);
+                
+                await addDoc(collection(db, coleccionStr), data);
                 inputsLimpiar.forEach(id => document.getElementById(id).value = '');
                 cargarListas(); 
             } catch (e) { alert("Error al guardar."); }
@@ -157,34 +176,54 @@
             if(titulo && imagenUrl) guardarDato("qrs", { titulo, imagenUrl, colorClass: document.getElementById('color-qr').value, icono: document.getElementById('icono-qr').value }, ['titulo-qr', 'img-qr']);
         });
 
-        // --- FUNCIONES PARA LEER Y BORRAR ---
+        // --- RENDERIZAR LISTAS Y BOTONES DE MOVER ---
         async function cargarListas() {
-            dibujarLista(await getDocs(query(collection(db, "redes"), orderBy("fecha", "desc"))), 'lista-redes', 'redes');
-            dibujarLista(await getDocs(query(collection(db, "videos"), orderBy("fecha", "desc"))), 'lista-videos', 'videos');
-            dibujarLista(await getDocs(query(collection(db, "qrs"), orderBy("fecha", "desc"))), 'lista-qrs', 'qrs');
+            dibujarLista(await fetchAndSort("redes"), 'lista-redes', 'redes');
+            dibujarLista(await fetchAndSort("videos"), 'lista-videos', 'videos');
+            dibujarLista(await fetchAndSort("qrs"), 'lista-qrs', 'qrs');
         }
 
-        function dibujarLista(querySnapshot, contenedorId, coleccion) {
+        function dibujarLista(items, contenedorId, coleccionStr) {
             const contenedor = document.getElementById(contenedorId);
             contenedor.innerHTML = '';
-            querySnapshot.forEach((documento) => {
-                const data = documento.data();
+            
+            items.forEach((data, index) => {
                 const div = document.createElement('div');
                 div.className = 'item-lista';
                 div.innerHTML = `
                     <span><i class="${data.icono}"></i> ${data.titulo}</span>
-                    <button class="btn-borrar" data-id="${documento.id}">Borrar</button>
+                    <div class="controles-lista">
+                        ${index > 0 ? `<button class="btn-mover" data-id="${data.id}" data-swap-id="${items[index-1].id}" data-orden="${data.orden}" data-swap-orden="${items[index-1].orden}">⬆️</button>` : ''}
+                        ${index < items.length - 1 ? `<button class="btn-mover" data-id="${data.id}" data-swap-id="${items[index+1].id}" data-orden="${data.orden}" data-swap-orden="${items[index+1].orden}">⬇️</button>` : ''}
+                        <button class="btn-borrar" data-id="${data.id}">Borrar</button>
+                    </div>
                 `;
                 contenedor.appendChild(div);
             });
 
+            // Lógica para Borrar
             contenedor.querySelectorAll('.btn-borrar').forEach(btn => {
                 btn.addEventListener('click', async (e) => {
                     const id = e.target.getAttribute('data-id');
                     if(confirm("¿Seguro que quieres borrar este elemento?")) {
-                        await deleteDoc(doc(db, coleccion, id));
+                        await deleteDoc(doc(db, coleccionStr, id));
                         cargarListas(); 
                     }
+                });
+            });
+
+            // Lógica para Mover (Arriba/Abajo)
+            contenedor.querySelectorAll('.btn-mover').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const id1 = e.target.getAttribute('data-id');
+                    const id2 = e.target.getAttribute('data-swap-id');
+                    const ord1 = Number(e.target.getAttribute('data-orden'));
+                    const ord2 = Number(e.target.getAttribute('data-swap-orden'));
+
+                    // Intercambiamos los valores de orden en la base de datos
+                    await updateDoc(doc(db, coleccionStr, id1), { orden: ord2 });
+                    await updateDoc(doc(db, coleccionStr, id2), { orden: ord1 });
+                    cargarListas();
                 });
             });
         }

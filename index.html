@@ -15,10 +15,12 @@
         <h1>Carlos</h1>
         <p>Comediante, Creador de Contenido y Productor Audiovisual</p>
 
+        <!-- Slider de QR -->
         <div class="qr-slider-container" id="contenedor-slider-general">
             <h2>Escanea y Sígueme</h2>
             <div class="qr-slider-viewport">
                 <div class="qr-slider-track" id="sliderTrack">
+                    <!-- QRs Base -->
                     <div class="slide"><h3 class="title-ig"><i class="fab fa-instagram"></i> Instagram</h3><img src="qr-instagram.png" alt="QR Instagram" class="qr-code"></div>
                     <div class="slide"><h3 class="title-tk"><i class="fab fa-tiktok"></i> TikTok</h3><img src="qr-tiktok.png" alt="QR TikTok" class="qr-code"></div>
                     <div class="slide"><h3 class="title-yt"><i class="fab fa-youtube"></i> YouTube</h3><img src="qr-youtube.png" alt="QR YouTube" class="qr-code"></div>
@@ -26,13 +28,13 @@
             </div>
         </div>
 
-        <h2 style="font-size: 1.2rem; margin: 20px 0 15px 0; color: #444; border-bottom: 2px solid #ddd; padding-bottom: 5px; text-align: left;">Redes Sociales</h2>
-        <div class="links" id="contenedor-redes">
-            </div>
+        <!-- SECCIÓN 1: REDES SOCIALES -->
+        <h2 style="font-size: 1.2rem; margin: 20px 0 15px 0; color: #444; border-bottom: 2px solid #ddd; padding-bottom: 5px; text-align: left; font-weight: 600;">Redes Sociales</h2>
+        <div class="links" id="contenedor-redes"></div>
 
-        <h2 style="font-size: 1.2rem; margin: 35px 0 15px 0; color: #444; border-bottom: 2px solid #ddd; padding-bottom: 5px; text-align: left;">Recomendados</h2>
-        <div class="links" id="contenedor-videos">
-            </div>
+        <!-- SECCIÓN 2: RECOMENDADOS -->
+        <h2 style="font-size: 1.2rem; margin: 35px 0 15px 0; color: #444; border-bottom: 2px solid #ddd; padding-bottom: 5px; text-align: left; font-weight: 600;">Recomendados</h2>
+        <div class="links" id="contenedor-videos"></div>
     </div>
 
     <footer>
@@ -41,9 +43,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // Tu configuración guardada en memoria
+        // ⚠️ PEGA AQUÍ TU FIREBASE CONFIG EXACTA ⚠️
         const firebaseConfig = {
             apiKey: "AIzaSyCNyzguxQ8g3_xXRisuk01SKVaZ4H9JLxI",
             authDomain: "mis-enlaces-panel.firebaseapp.com",
@@ -57,12 +59,19 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        function dibujarBotones(querySnapshot, contenedorId, estiloExtra = "") {
+        // Trae los datos y los ordena por su número
+        async function fetchAndSort(coleccionStr) {
+            const snapshot = await getDocs(collection(db, coleccionStr));
+            const items = [];
+            snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
+            items.sort((a, b) => (a.orden ?? 999) - (b.orden ?? 999));
+            return items;
+        }
+
+        function dibujarBotones(items, contenedorId, estiloExtra = "") {
             const contenedor = document.getElementById(contenedorId);
             contenedor.innerHTML = ''; 
-            
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
+            items.forEach((data) => {
                 const boton = document.createElement('a');
                 boton.href = data.url;
                 boton.className = 'btn';
@@ -75,22 +84,14 @@
 
         async function cargarTodo() {
             try {
-                // Cargar Redes
-                const qRedes = query(collection(db, "redes"), orderBy("fecha", "desc"));
-                dibujarBotones(await getDocs(qRedes), 'contenedor-redes');
+                dibujarBotones(await fetchAndSort("redes"), 'contenedor-redes');
+                dibujarBotones(await fetchAndSort("videos"), 'contenedor-videos', '2px solid #333'); 
 
-                // Cargar Videos (Recomendados)
-                const qVideos = query(collection(db, "videos"), orderBy("fecha", "desc"));
-                dibujarBotones(await getDocs(qVideos), 'contenedor-videos', '2px solid #333'); 
-
-                // Cargar QRs extra
-                const qQrs = query(collection(db, "qrs"), orderBy("fecha", "desc"));
-                const qrsSnapshot = await getDocs(qQrs);
+                const qrsItems = await fetchAndSort("qrs");
                 const track = document.getElementById('sliderTrack');
                 
-                if(!qrsSnapshot.empty) {
-                    qrsSnapshot.forEach((doc) => {
-                        const data = doc.data();
+                if(qrsItems.length > 0) {
+                    qrsItems.forEach((data) => {
                         const slide = document.createElement('div');
                         slide.className = 'slide';
                         slide.innerHTML = `
@@ -101,7 +102,6 @@
                     });
                 }
 
-                // Iniciar Animación Slider
                 const slides = document.querySelectorAll('.slide');
                 let currentIndex = 0;
                 setInterval(() => {

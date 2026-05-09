@@ -1,14 +1,16 @@
 /* =========================================
    1. RESETEO Y BASE GENERAL
 ========================================= */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    font-family: 'Poppins', sans-serif; /* Tipografía Poppins Global */
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     color: #333;
     min-height: 100vh;
@@ -43,13 +45,14 @@ body {
 h1 {
     font-size: 1.8rem;
     margin-bottom: 5px;
-    font-weight: bold;
+    font-weight: 700;
 }
 
 p {
     font-size: 0.95rem;
     color: #555;
     margin-bottom: 30px;
+    font-weight: 400;
 }
 
 /* =========================================
@@ -70,6 +73,7 @@ p {
     margin-bottom: 15px;
     text-transform: uppercase;
     letter-spacing: 1px;
+    font-weight: 600;
 }
 
 .qr-slider-viewport {
@@ -99,6 +103,7 @@ p {
     display: flex;
     align-items: center;
     gap: 8px;
+    font-weight: 600;
 }
 
 .title-ig { color: #E1306C; }
