@@ -29,11 +29,11 @@
         </div>
 
         <!-- SECCIÓN 1: REDES SOCIALES -->
-        <h2 style="font-size: 1.2rem; margin: 20px 0 15px 0; color: #444; border-bottom: 2px solid #ddd; padding-bottom: 5px; text-align: left; font-weight: 600;">Redes Sociales</h2>
+        <h2 id="titulo-redes" class="seccion-titulo">Redes Sociales</h2>
         <div class="links" id="contenedor-redes"></div>
 
         <!-- SECCIÓN 2: RECOMENDADOS -->
-        <h2 style="font-size: 1.2rem; margin: 35px 0 15px 0; color: #444; border-bottom: 2px solid #ddd; padding-bottom: 5px; text-align: left; font-weight: 600;">Recomendados</h2>
+        <h2 id="titulo-recomendados" class="seccion-titulo">Recomendados</h2>
         <div class="links" id="contenedor-videos"></div>
     </div>
 
@@ -45,7 +45,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // ⚠️ PEGA AQUÍ TU FIREBASE CONFIG EXACTA ⚠️
         const firebaseConfig = {
             apiKey: "AIzaSyCNyzguxQ8g3_xXRisuk01SKVaZ4H9JLxI",
             authDomain: "mis-enlaces-panel.firebaseapp.com",
@@ -59,7 +58,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Trae los datos y los ordena por su número
         async function fetchAndSort(coleccionStr) {
             const snapshot = await getDocs(collection(db, coleccionStr));
             const items = [];
@@ -68,36 +66,42 @@
             return items;
         }
 
-        function dibujarBotones(items, contenedorId, estiloExtra = "") {
+        function dibujarBotones(items, contenedorId, tituloId, estiloExtra = "") {
             const contenedor = document.getElementById(contenedorId);
-            contenedor.innerHTML = ''; 
-            items.forEach((data) => {
-                const boton = document.createElement('a');
-                boton.href = data.url;
-                boton.className = 'btn';
-                if(estiloExtra) boton.style.border = estiloExtra; 
-                boton.target = '_blank';
-                boton.innerHTML = `<i class="${data.icono}"></i> ${data.titulo}`;
-                contenedor.appendChild(boton);
-            });
+            const titulo = document.getElementById(tituloId);
+            
+            if (items.length > 0) {
+                titulo.style.display = 'block'; // Muestra el título solo si hay items
+                contenedor.innerHTML = ''; 
+                items.forEach((data) => {
+                    const boton = document.createElement('a');
+                    boton.href = data.url;
+                    boton.className = 'btn';
+                    if(estiloExtra) boton.style.border = estiloExtra; 
+                    boton.target = '_blank';
+                    boton.innerHTML = `<i class="${data.icono}"></i> ${data.titulo}`;
+                    contenedor.appendChild(boton);
+                });
+            } else {
+                titulo.style.display = 'none'; // Lo oculta si está vacío
+            }
         }
 
         async function cargarTodo() {
             try {
-                dibujarBotones(await fetchAndSort("redes"), 'contenedor-redes');
-                dibujarBotones(await fetchAndSort("videos"), 'contenedor-videos', '2px solid #333'); 
+                const redes = await fetchAndSort("redes");
+                dibujarBotones(redes, 'contenedor-redes', 'titulo-redes');
+
+                const videos = await fetchAndSort("videos");
+                dibujarBotones(videos, 'contenedor-videos', 'titulo-recomendados', '2px solid #333'); 
 
                 const qrsItems = await fetchAndSort("qrs");
                 const track = document.getElementById('sliderTrack');
-                
                 if(qrsItems.length > 0) {
                     qrsItems.forEach((data) => {
                         const slide = document.createElement('div');
                         slide.className = 'slide';
-                        slide.innerHTML = `
-                            <h3 class="${data.colorClass}"><i class="${data.icono}"></i> ${data.titulo}</h3>
-                            <img src="${data.imagenUrl}" alt="QR" class="qr-code">
-                        `;
+                        slide.innerHTML = `<h3 class="${data.colorClass}"><i class="${data.icono}"></i> ${data.titulo}</h3><img src="${data.imagenUrl}" alt="QR" class="qr-code">`;
                         track.appendChild(slide);
                     });
                 }
@@ -109,9 +113,8 @@
                     if (currentIndex >= slides.length) currentIndex = 0; 
                     track.style.transform = `translateX(-${currentIndex * 100}%)`;
                 }, 3500);
-
             } catch (error) {
-                console.error("Error conectando a Firebase:", error);
+                console.error("Error:", error);
             }
         }
 
