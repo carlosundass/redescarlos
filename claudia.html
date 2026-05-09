@@ -10,26 +10,20 @@
 <body>
 
     <div class="container">
-        <!-- Elementos del perfil Dinámicos -->
         <img src="claudia-perfil.jpg" alt="Foto de Claudia" class="profile-pic" id="display-foto">
         <h1 id="display-nombre">Claudia</h1>
         <p id="display-desc">Actriz y Coach Actoral</p>
 
-        <!-- Slider de QR -->
-        <div class="qr-slider-container" id="contenedor-slider-general">
+        <div class="qr-slider-container">
             <h2>Escanea y Sígueme</h2>
-            <div class="qr-slider-viewport">
-                <div class="qr-slider-track" id="sliderTrack">
-                    <!-- QRs Base Solicitados -->
-                    <div class="slide"><h3 class="title-ig"><i class="fab fa-instagram"></i> Instagram Claudia</h3><img src="qr-ig-claudia.png" alt="QR IG Claudia" class="qr-code"></div>
-                    <div class="slide"><h3 class="title-tk"><i class="fab fa-tiktok"></i> TikTok Claudia</h3><img src="qr-tk-claudia.png" alt="QR TK Claudia" class="qr-code"></div>
-                    <div class="slide"><h3 class="title-ig"><i class="fab fa-instagram"></i> Instagram La Claketa</h3><img src="qr-ig-claketa.png" alt="QR IG Claketa" class="qr-code"></div>
-                    <div class="slide"><h3 class="title-pd"><i class="fas fa-globe"></i> Web La Claketa</h3><img src="qr-web-claketa.png" alt="QR Web Claketa" class="qr-code"></div>
-                </div>
+            <div class="qr-grid" id="qrGrid">
+                <div class="qr-item"><h3 class="title-ig"><i class="fab fa-instagram"></i> Instagram Claudia</h3><img src="qr-ig-claudia.png" alt="QR IG Claudia" class="qr-code"></div>
+                <div class="qr-item"><h3 class="title-tk"><i class="fab fa-tiktok"></i> TikTok Claudia</h3><img src="qr-tk-claudia.png" alt="QR TK Claudia" class="qr-code"></div>
+                <div class="qr-item"><h3 class="title-ig"><i class="fab fa-instagram"></i> Instagram La Claketa</h3><img src="qr-ig-claketa.png" alt="QR IG Claketa" class="qr-code"></div>
+                <div class="qr-item"><h3 class="title-pd"><i class="fas fa-globe"></i> Web La Claketa</h3><img src="qr-web-claketa.png" alt="QR Web Claketa" class="qr-code"></div>
             </div>
         </div>
 
-        <!-- SECCIONES DINÁMICAS (Se ocultan si están vacías) -->
         <h2 id="titulo-redes" class="seccion-titulo">Redes Sociales</h2>
         <div class="links" id="contenedor-redes" style="margin-bottom: 15px;"></div>
 
@@ -69,7 +63,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // OJO: Apunta al perfil de claudia
+        // Apunta al perfil de claudia
         async function cargarPerfil() {
             try {
                 const docSnap = await getDoc(doc(db, "configuracion", "perfil_claudia"));
@@ -113,7 +107,7 @@
         async function cargarTodo() {
             await cargarPerfil(); 
             try {
-                // OJO: Apuntando a las colecciones "_claudia"
+                // Apuntando a las colecciones "_claudia"
                 const redes = await fetchAndSort("redes_claudia");
                 dibujarBotones(redes, 'contenedor-redes', 'titulo-redes');
 
@@ -129,24 +123,20 @@
                 dibujarBotones(shows, 'contenedor-shows', 'titulo-shows', '2px solid #1e88e5'); 
                 dibujarBotones(videosGen, 'contenedor-videosgen', 'titulo-videosgen', '2px solid #555'); 
 
+                // Si agrega QRs extras desde el panel, se suman al grid fijo en lugar de moverse
                 const qrsItems = await fetchAndSort("qrs_claudia");
-                const track = document.getElementById('sliderTrack');
+                const grid = document.getElementById('qrGrid');
                 if(qrsItems.length > 0) {
                     qrsItems.forEach((data) => {
-                        const slide = document.createElement('div');
-                        slide.className = 'slide';
-                        slide.innerHTML = `<h3 class="${data.colorClass}"><i class="${data.icono}"></i> ${data.titulo}</h3><img src="${data.imagenUrl}" alt="QR" class="qr-code">`;
-                        track.appendChild(slide);
+                        const item = document.createElement('div');
+                        item.className = 'qr-item';
+                        item.innerHTML = `<h3 class="${data.colorClass}"><i class="${data.icono}"></i> ${data.titulo}</h3><img src="${data.imagenUrl}" alt="QR" class="qr-code">`;
+                        grid.appendChild(item);
                     });
                 }
+                
+                // NOTA: Eliminado el setInterval del slider. ¡Todo queda estático a la vista!
 
-                const slides = document.querySelectorAll('.slide');
-                let currentIndex = 0;
-                setInterval(() => {
-                    currentIndex++;
-                    if (currentIndex >= slides.length) currentIndex = 0; 
-                    track.style.transform = `translateX(-${currentIndex * 100}%)`;
-                }, 3500);
             } catch (error) { console.error("Error:", error); }
         }
         cargarTodo();
