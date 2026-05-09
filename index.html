@@ -15,12 +15,26 @@
         <h1>Carlos</h1>
         <p>Comediante, Creador de Contenido y Productor Audiovisual</p>
 
-        <!-- Slider de QR Dinámico -->
-        <div class="qr-slider-container" id="contenedor-slider-general" style="display:none;">
+        <!-- Slider de QR (Con tus QR originales fijos) -->
+        <div class="qr-slider-container" id="contenedor-slider-general">
             <h2>Escanea y Sígueme</h2>
             <div class="qr-slider-viewport">
                 <div class="qr-slider-track" id="sliderTrack">
-                    <!-- Los QR aparecerán aquí desde Firebase -->
+                    
+                    <!-- Tus QR Base -->
+                    <div class="slide">
+                        <h3 class="title-ig"><i class="fab fa-instagram"></i> Instagram</h3>
+                        <img src="qr-instagram.png" alt="QR Instagram" class="qr-code">
+                    </div>
+                    <div class="slide">
+                        <h3 class="title-tk"><i class="fab fa-tiktok"></i> TikTok</h3>
+                        <img src="qr-tiktok.png" alt="QR TikTok" class="qr-code">
+                    </div>
+                    <div class="slide">
+                        <h3 class="title-yt"><i class="fab fa-youtube"></i> YouTube</h3>
+                        <img src="qr-youtube.png" alt="QR YouTube" class="qr-code">
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -46,7 +60,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // ⚠️ PEGA AQUÍ TU FIREBASE CONFIG EXACTA ⚠️
+        // Tu configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCNyzguxQ8g3_xXRisuk01SKVaZ4H9JLxI",
             authDomain: "mis-enlaces-panel.firebaseapp.com",
@@ -60,24 +74,22 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Función para renderizar botones normales (Redes o Videos)
         function dibujarBotones(querySnapshot, contenedorId, estiloExtra = "") {
             const contenedor = document.getElementById(contenedorId);
-            contenedor.innerHTML = ''; // Limpiar carga
+            contenedor.innerHTML = ''; 
             
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 const boton = document.createElement('a');
                 boton.href = data.url;
                 boton.className = 'btn';
-                if(estiloExtra) boton.style.border = estiloExtra; // Para destacar los videos
+                if(estiloExtra) boton.style.border = estiloExtra; 
                 boton.target = '_blank';
                 boton.innerHTML = `<i class="${data.icono}"></i> ${data.titulo}`;
                 contenedor.appendChild(boton);
             });
         }
 
-        // Cargar todo al inicio
         async function cargarTodo() {
             try {
                 // 1. Cargar Redes
@@ -86,15 +98,14 @@
 
                 // 2. Cargar Videos
                 const qVideos = query(collection(db, "videos"), orderBy("fecha", "desc"));
-                dibujarBotones(await getDocs(qVideos), 'contenedor-videos', '2px solid #ff0000'); // Videos con borde rojo
+                dibujarBotones(await getDocs(qVideos), 'contenedor-videos', '2px solid #ff0000'); 
 
-                // 3. Cargar QRs
+                // 3. Cargar QRs extra (se sumarán a los que ya están en el HTML)
                 const qQrs = query(collection(db, "qrs"), orderBy("fecha", "desc"));
                 const qrsSnapshot = await getDocs(qQrs);
                 const track = document.getElementById('sliderTrack');
                 
                 if(!qrsSnapshot.empty) {
-                    document.getElementById('contenedor-slider-general').style.display = 'block';
                     qrsSnapshot.forEach((doc) => {
                         const data = doc.data();
                         const slide = document.createElement('div');
@@ -105,16 +116,16 @@
                         `;
                         track.appendChild(slide);
                     });
-
-                    // Iniciar la animación del Slider solo si hay QRs cargados
-                    const slides = document.querySelectorAll('.slide');
-                    let currentIndex = 0;
-                    setInterval(() => {
-                        currentIndex++;
-                        if (currentIndex >= slides.length) currentIndex = 0; 
-                        track.style.transform = `translateX(-${currentIndex * 100}%)`;
-                    }, 3500);
                 }
+
+                // Iniciar la animación del Slider SIEMPRE (ya que tenemos los 3 fijos)
+                const slides = document.querySelectorAll('.slide');
+                let currentIndex = 0;
+                setInterval(() => {
+                    currentIndex++;
+                    if (currentIndex >= slides.length) currentIndex = 0; 
+                    track.style.transform = `translateX(-${currentIndex * 100}%)`;
+                }, 3500);
 
             } catch (error) {
                 console.error("Error conectando a Firebase:", error);
