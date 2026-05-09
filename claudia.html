@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Claudia Aravena - Enlaces</title>
+    <title>Claudia Aravena Etchegaray - Enlaces</title>
     <link rel="stylesheet" href="style.css?v=3">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
     <div class="container">
-        <img src="claudia.jpeg" alt="Foto de Claudia" class="profile-pic" id="display-foto">
-        <h1 id="display-nombre">Claudia</h1>
+        <img src="claudia.jpeg" alt="Foto de Claudia Aravena Etchegaray" class="profile-pic" id="display-foto">
+        <h1 id="display-nombre">Claudia Aravena Etchegaray</h1>
         <p id="display-desc">Actriz y Coach Actoral</p>
 
         <div class="qr-slider-container">
@@ -42,14 +42,13 @@
     </div>
 
     <footer>
-        <p>&copy; 2026 Claudia. Todos los derechos reservados.</p>
+        <p>&copy; 2026 Claudia Aravena Etchegaray. Todos los derechos reservados.</p>
     </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // Tu Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyCNyzguxQ8g3_xXRisuk01SKVaZ4H9JLxI",
             authDomain: "mis-enlaces-panel.firebaseapp.com",
@@ -106,19 +105,12 @@
         async function cargarTodo() {
             await cargarPerfil(); 
             try {
-                const redes = await fetchAndSort("redes_claudia");
-                dibujarBotones(redes, 'contenedor-redes', 'titulo-redes');
-
+                dibujarBotones(await fetchAndSort("redes_claudia"), 'contenedor-redes', 'titulo-redes');
                 const recomendadosFull = await fetchAndSort("videos_claudia");
-                const destacados = recomendadosFull.filter(v => v.icono === "fas fa-star");
-                const youtube = recomendadosFull.filter(v => v.icono === "fab fa-youtube");
-                const shows = recomendadosFull.filter(v => v.icono === "fas fa-ticket-alt");
-                const videosGen = recomendadosFull.filter(v => v.icono === "fas fa-play-circle");
-
-                dibujarBotones(destacados, 'contenedor-destacado', 'titulo-destacado', '2px solid #FFD700'); 
-                dibujarBotones(youtube, 'contenedor-youtube', 'titulo-youtube', '2px solid #FF0000'); 
-                dibujarBotones(shows, 'contenedor-shows', 'titulo-shows', '2px solid #1e88e5'); 
-                dibujarBotones(videosGen, 'contenedor-videosgen', 'titulo-videosgen', '2px solid #555'); 
+                dibujarBotones(recomendadosFull.filter(v => v.icono === "fas fa-star"), 'contenedor-destacado', 'titulo-destacado', '2px solid #FFD700'); 
+                dibujarBotones(recomendadosFull.filter(v => v.icono === "fab fa-youtube"), 'contenedor-youtube', 'titulo-youtube', '2px solid #FF0000'); 
+                dibujarBotones(recomendadosFull.filter(v => v.icono === "fas fa-ticket-alt"), 'contenedor-shows', 'titulo-shows', '2px solid #1e88e5'); 
+                dibujarBotones(recomendadosFull.filter(v => v.icono === "fas fa-play-circle"), 'contenedor-videosgen', 'titulo-videosgen', '2px solid #555'); 
 
                 const qrsItems = await fetchAndSort("qrs_claudia");
                 const grid = document.getElementById('qrGrid');
