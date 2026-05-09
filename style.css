@@ -9,7 +9,6 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    /* Un fondo degradado sutil */
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     color: #333;
     min-height: 100vh;
@@ -26,7 +25,6 @@ body {
     flex-grow: 1;
 }
 
-/* Efecto dinámico en la foto de perfil */
 .profile-pic {
     width: 120px;
     height: 120px;
@@ -55,7 +53,7 @@ p {
 }
 
 /* =========================================
-   2. ESTILOS DEL SLIDER QR
+   2. ESTILOS DEL SLIDER QR (Corregido)
 ========================================= */
 .qr-slider-container {
     background-color: #fff;
@@ -74,27 +72,28 @@ p {
     letter-spacing: 1px;
 }
 
-/* Esta es la "ventana" por donde se ven los slides */
 .qr-slider-viewport {
     width: 100%;
     overflow: hidden; 
     border-radius: 12px;
+    /* Agregamos padding para que la base del QR no se corte */
+    padding-bottom: 15px; 
 }
 
-/* Esta es la cinta que se mueve */
 .qr-slider-track {
     display: flex;
     width: 100%;
     transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1); 
 }
 
-/* Cada tarjeta individual */
 .slide {
     min-width: 100%; 
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
+    /* Le damos espacio arriba y abajo para que respire */
+    padding: 10px 0; 
 }
 
 .slide h3 {
@@ -104,27 +103,27 @@ p {
     gap: 8px;
 }
 
-/* Colores para cada red social */
 .title-ig { color: #E1306C; }
 .title-tk { color: #000000; }
 .title-yt { color: #FF0000; }
-.title-pd { color: #8940FA; }
 
-/* Diseño y efecto dinámico de las imágenes QR */
+/* Ajuste vital para evitar cortes en el QR */
 .qr-code {
     width: 160px;
-    height: 160px;
+    height: auto;
+    aspect-ratio: 1 / 1; /* Forzamos que sea un cuadrado perfecto */
+    object-fit: contain; /* Asegura que la imagen no se desborde */
     border-radius: 12px;
     border: 3px solid #f0f0f0;
     padding: 8px;
     background-color: #fff;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Ajusté la sombra para que se note mejor */
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .qr-code:hover {
     transform: scale(1.08);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
 }
 
 /* =========================================
