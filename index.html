@@ -50,7 +50,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // ⚠️ TU CONFIGURACIÓN DE FIREBASE ⚠️
         const firebaseConfig = {
             apiKey: "AIzaSyCNyzguxQ8g3_xXRisuk01SKVaZ4H9JLxI",
             authDomain: "mis-enlaces-panel.firebaseapp.com",
@@ -111,12 +110,26 @@
                 items.forEach((data) => {
                     const card = document.createElement('div');
                     card.className = 'event-card';
+                    
+                    // Creamos el enlace seguro para Google Maps combinando dirección y lugar
+                    const busquedaMapa = encodeURIComponent(`${data.direccionShow} ${data.lugarShow || ''}`);
+                    const urlMapa = `https://www.google.com/maps/search/?api=1&query=${busquedaMapa}`;
+
                     card.innerHTML = `
                         ${data.imagen ? `<img src="${data.imagen}" alt="${data.titulo}" class="event-img">` : ''}
                         <div class="event-info">
                             <div class="event-title">${data.titulo}</div>
                             ${data.lugarShow ? `<div class="event-detail"><i class="fas fa-map-marker-alt"></i> <b>Lugar:</b> ${data.lugarShow}</div>` : ''}
-                            ${data.direccionShow ? `<div class="event-detail"><i class="fas fa-location-arrow"></i> <b>Dirección:</b> ${data.direccionShow}</div>` : ''}
+                            
+                            ${data.direccionShow ? `
+                                <div class="event-detail">
+                                    <i class="fas fa-location-arrow"></i> 
+                                    <b>Dirección:</b>&nbsp;
+                                    <a href="${urlMapa}" target="_blank" style="color: #1e88e5; text-decoration: none; font-weight: 600;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                                        ${data.direccionShow} <i class="fas fa-external-link-alt" style="font-size: 0.75rem; color: #1e88e5; margin-left: 2px;"></i>
+                                    </a>
+                                </div>` : ''}
+                            
                             ${data.fechaShow ? `<div class="event-detail"><i class="fas fa-calendar-alt"></i> <b>Fecha:</b> ${data.fechaShow}</div>` : ''}
                             ${data.horaShow ? `<div class="event-detail"><i class="fas fa-clock"></i> <b>Hora:</b> ${data.horaShow}</div>` : ''}
                             <a href="${data.url}" target="_blank" class="event-btn"><i class="fas fa-ticket-alt"></i> Entradas</a>
