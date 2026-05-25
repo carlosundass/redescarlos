@@ -14,6 +14,21 @@
         <h1 id="display-nombre">Carlos</h1>
         <p id="display-desc">Comediante, Creador de Contenido y Productor Audiovisual</p>
 
+        <h2 id="titulo-shows" class="seccion-titulo">🎫 Shows y Entradas</h2>
+        <div class="links" id="contenedor-shows" style="margin-bottom: 25px;"></div>
+
+        <h2 id="titulo-destacado" class="seccion-titulo">⭐ Destacado</h2>
+        <div class="links" id="contenedor-destacado" style="margin-bottom: 15px;"></div>
+
+        <h2 id="titulo-redes" class="seccion-titulo">Redes Sociales</h2>
+        <div class="links" id="contenedor-redes" style="margin-bottom: 15px;"></div>
+
+        <h2 id="titulo-youtube" class="seccion-titulo">▶️ YouTube</h2>
+        <div class="links" id="contenedor-youtube" style="margin-bottom: 15px;"></div>
+
+        <h2 id="titulo-videosgen" class="seccion-titulo">⏯️ Videos</h2>
+        <div class="links" id="contenedor-videosgen" style="margin-bottom: 25px;"></div>
+
         <div class="qr-slider-container" id="contenedor-slider-general">
             <h2>Escanea y Sígueme</h2>
             <div class="qr-slider-viewport">
@@ -25,21 +40,6 @@
             </div>
         </div>
 
-        <h2 id="titulo-redes" class="seccion-titulo">Redes Sociales</h2>
-        <div class="links" id="contenedor-redes" style="margin-bottom: 15px;"></div>
-
-        <h2 id="titulo-destacado" class="seccion-titulo">⭐ Destacado</h2>
-        <div class="links" id="contenedor-destacado" style="margin-bottom: 15px;"></div>
-
-        <h2 id="titulo-youtube" class="seccion-titulo">▶️ YouTube</h2>
-        <div class="links" id="contenedor-youtube" style="margin-bottom: 15px;"></div>
-
-        <h2 id="titulo-shows" class="seccion-titulo">🎫 Shows y Entradas</h2>
-        <div class="links" id="contenedor-shows" style="margin-bottom: 15px;"></div>
-
-        <h2 id="titulo-videosgen" class="seccion-titulo">⏯️ Videos</h2>
-        <div class="links" id="contenedor-videosgen" style="margin-bottom: 15px;"></div>
-
     </div>
 
     <footer>
@@ -50,6 +50,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+        // ⚠️ TU CONFIGURACIÓN DE FIREBASE ⚠️
         const firebaseConfig = {
             apiKey: "AIzaSyCNyzguxQ8g3_xXRisuk01SKVaZ4H9JLxI",
             authDomain: "mis-enlaces-panel.firebaseapp.com",
@@ -101,7 +102,6 @@
             } else { titulo.style.display = 'none'; }
         }
 
-        // Función de Tarjetas con Lugar y Dirección Añadidos
         function dibujarShows(items, contenedorId, tituloId) {
             const contenedor = document.getElementById(contenedorId);
             const titulo = document.getElementById(tituloId);
