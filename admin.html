@@ -18,12 +18,12 @@
         h2 { margin-top: 0; text-align: center; font-size: 1.3rem; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
         #admin-panel { display: none; width: 100%; max-width: 500px; }
         .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
-        .item-lista span { display: flex; align-items: center; gap: 8px; font-weight: 500;}
+        .item-lista span { display: flex; align-items: center; gap: 8px; font-weight: 500; flex-grow: 1; }
         .controles-lista { display: flex; gap: 5px; }
-        .btn-mover { background: #e0e0e0; color: #333; padding: 6px 10px; border-radius: 6px; width: auto; margin: 0; font-size: 0.9rem; }
-        .btn-mover:hover { background: #ccc; }
-        .btn-borrar { background: #ff4d4d; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; width: auto; margin: 0; font-size: 0.8rem; }
-        .btn-borrar:hover { background: #cc0000; }
+        .btn-mover, .btn-editar, .btn-borrar { padding: 6px 10px; border-radius: 6px; width: auto; margin: 0; font-size: 0.9rem; cursor: pointer; border: none; }
+        .btn-mover { background: #e0e0e0; color: #333; } .btn-mover:hover { background: #ccc; }
+        .btn-editar { background: #ffc107; color: #000; } .btn-editar:hover { background: #e0a800; }
+        .btn-borrar { background: #ff4d4d; color: white; } .btn-borrar:hover { background: #cc0000; }
         .contenedor-lista { margin-top: 20px; border-top: 2px dashed #eee; padding-top: 15px; }
     </style>
 </head>
@@ -46,7 +46,7 @@
             <button id="btnGuardarPerfil" class="btn-perfil">Actualizar Perfil</button>
         </div>
 
-        <div class="card">
+        <div class="card" id="seccion-redes">
             <h2>📱 Redes Sociales</h2>
             <input type="text" id="titulo-red" placeholder="Título (Ej: Mi Instagram)">
             <input type="url" id="url-red" placeholder="URL (Ej: https://instagram.com/...)">
@@ -60,10 +60,11 @@
                 <option value="fas fa-globe">🌐 Sitio Web</option>
             </select>
             <button id="btnGuardarRed">Guardar Red Social</button>
+            <button id="btnCancelarRed" style="display:none; background: #888; margin-top: 0;">Cancelar Edición</button>
             <div class="contenedor-lista" id="lista-redes"></div>
         </div>
 
-        <div class="card">
+        <div class="card" id="seccion-videos">
             <h2>🎬 Categorías (Videos, Shows)</h2>
             <input type="text" id="titulo-video" placeholder="Título (Ej: Show en Coquimbo)">
             <input type="url" id="url-video" placeholder="URL de compra o video">
@@ -78,14 +79,17 @@
             <input type="url" id="extra-imagen" placeholder="URL de la Imagen/Afiche del Show">
             <input type="text" id="extra-lugar" placeholder="Nombre del Lugar (Ej: Restobar El Cohete)">
             <input type="text" id="extra-direccion" placeholder="Dirección (Ej: Av. Costanera 123, Coquimbo)">
-            <input type="text" id="extra-fecha" placeholder="Fecha (Ej: 25 de Julio)">
+            
+            <label style="font-size: 0.85rem; color: #555; display: block; margin-bottom: 5px;">Fecha del Show:</label>
+            <input type="date" id="extra-fecha">
             <input type="text" id="extra-hora" placeholder="Hora (Ej: 22:00hrs.)">
 
             <button id="btnGuardarVideo" class="btn-red">Guardar Enlace</button>
+            <button id="btnCancelarVideo" style="display:none; background: #888; margin-top: 0;">Cancelar Edición</button>
             <div class="contenedor-lista" id="lista-videos"></div>
         </div>
 
-        <div class="card">
+        <div class="card" id="seccion-qrs">
             <h2>🔳 Códigos QR Adicionales</h2>
             <select id="color-qr">
                 <option value="title-ig">Color Instagram (Rosa)</option>
@@ -96,6 +100,7 @@
             <select id="icono-qr"><option value="fas fa-link">🔗 Enlace Genérico</option></select>
             <input type="url" id="img-qr" placeholder="URL del QR">
             <button id="btnGuardarQR" class="btn-qr">Guardar QR Extra</button>
+            <button id="btnCancelarQR" style="display:none; background: #888; margin-top: 0;">Cancelar Edición</button>
             <div class="contenedor-lista" id="lista-qrs"></div>
         </div>
 
@@ -107,6 +112,7 @@
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
+        // ⚠️ TU FIREBASE CONFIG ⚠️
         const firebaseConfig = {
             apiKey: "AIzaSyCNyzguxQ8g3_xXRisuk01SKVaZ4H9JLxI",
             authDomain: "mis-enlaces-panel.firebaseapp.com",
@@ -120,6 +126,9 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+
+        // Variables de estado para saber qué estamos editando
+        let editando = { redes: null, videos: null, qrs: null };
 
         document.getElementById('btnLogin').addEventListener('click', () => {
             signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).catch(() => alert("Error"));
@@ -160,28 +169,55 @@
             return items;
         }
 
-        async function guardarDato(coleccionStr, data, inputsLimpiar) {
+        // Esta función ahora detecta si está guardando uno nuevo o actualizando uno existente
+        async function guardarOActualizar(coleccionStr, data, inputsLimpiar, idEdicion) {
             try {
-                const itemsActuales = await fetchAndSort(coleccionStr);
-                data.orden = itemsActuales.length; 
-                data.fecha = new Date();
-                await addDoc(collection(db, coleccionStr), data);
+                if (idEdicion) {
+                    await updateDoc(doc(db, coleccionStr, idEdicion), data);
+                    limpiarEdicion(coleccionStr);
+                } else {
+                    const itemsActuales = await fetchAndSort(coleccionStr);
+                    data.orden = itemsActuales.length; 
+                    data.fecha = new Date();
+                    await addDoc(collection(db, coleccionStr), data);
+                }
                 inputsLimpiar.forEach(id => document.getElementById(id).value = '');
                 cargarListas(); 
-            } catch (e) { alert("Error"); }
+            } catch (e) { alert("Error al procesar la solicitud"); }
         }
+
+        function limpiarEdicion(coleccionStr) {
+            if (coleccionStr === 'redes') {
+                editando.redes = null;
+                document.getElementById('btnGuardarRed').innerText = "Guardar Red Social";
+                document.getElementById('btnCancelarRed').style.display = "none";
+            } else if (coleccionStr === 'videos') {
+                editando.videos = null;
+                document.getElementById('btnGuardarVideo').innerText = "Guardar Enlace";
+                document.getElementById('btnCancelarVideo').style.display = "none";
+            } else if (coleccionStr === 'qrs') {
+                editando.qrs = null;
+                document.getElementById('btnGuardarQR').innerText = "Guardar QR Extra";
+                document.getElementById('btnCancelarQR').style.display = "none";
+            }
+        }
+
+        // Botones de cancelar edición
+        document.getElementById('btnCancelarRed').addEventListener('click', () => { limpiarEdicion('redes'); ['titulo-red', 'url-red'].forEach(id => document.getElementById(id).value = ''); });
+        document.getElementById('btnCancelarVideo').addEventListener('click', () => { limpiarEdicion('videos'); ['titulo-video', 'url-video', 'extra-imagen', 'extra-lugar', 'extra-direccion', 'extra-fecha', 'extra-hora'].forEach(id => document.getElementById(id).value = ''); });
+        document.getElementById('btnCancelarQR').addEventListener('click', () => { limpiarEdicion('qrs'); ['titulo-qr', 'img-qr'].forEach(id => document.getElementById(id).value = ''); });
 
         document.getElementById('btnGuardarRed').addEventListener('click', () => {
             const titulo = document.getElementById('titulo-red').value;
             const url = document.getElementById('url-red').value;
-            if(titulo && url) guardarDato("redes", { titulo, url, icono: document.getElementById('icono-red').value }, ['titulo-red', 'url-red']);
+            if(titulo && url) guardarOActualizar("redes", { titulo, url, icono: document.getElementById('icono-red').value }, ['titulo-red', 'url-red'], editando.redes);
         });
 
         document.getElementById('btnGuardarVideo').addEventListener('click', () => {
             const titulo = document.getElementById('titulo-video').value;
             const url = document.getElementById('url-video').value;
             if(titulo && url) {
-                guardarDato("videos", { 
+                guardarOActualizar("videos", { 
                     titulo, 
                     url, 
                     icono: document.getElementById('icono-video').value,
@@ -190,14 +226,14 @@
                     direccionShow: document.getElementById('extra-direccion').value || '',
                     fechaShow: document.getElementById('extra-fecha').value || '',
                     horaShow: document.getElementById('extra-hora').value || ''
-                }, ['titulo-video', 'url-video', 'extra-imagen', 'extra-lugar', 'extra-direccion', 'extra-fecha', 'extra-hora']);
+                }, ['titulo-video', 'url-video', 'extra-imagen', 'extra-lugar', 'extra-direccion', 'extra-fecha', 'extra-hora'], editando.videos);
             }
         });
 
         document.getElementById('btnGuardarQR').addEventListener('click', () => {
             const titulo = document.getElementById('titulo-qr').value;
             const imagenUrl = document.getElementById('img-qr').value;
-            if(titulo && imagenUrl) guardarDato("qrs", { titulo, imagenUrl, colorClass: document.getElementById('color-qr').value, icono: 'fas fa-link' }, ['titulo-qr', 'img-qr']);
+            if(titulo && imagenUrl) guardarOActualizar("qrs", { titulo, imagenUrl, colorClass: document.getElementById('color-qr').value, icono: 'fas fa-link' }, ['titulo-qr', 'img-qr'], editando.qrs);
         });
 
         async function cargarListas() {
@@ -217,16 +253,53 @@
                     <div class="controles-lista">
                         ${index > 0 ? `<button class="btn-mover" data-id="${data.id}" data-swap-id="${items[index-1].id}" data-orden="${data.orden}" data-swap-orden="${items[index-1].orden}">⬆️</button>` : ''}
                         ${index < items.length - 1 ? `<button class="btn-mover" data-id="${data.id}" data-swap-id="${items[index+1].id}" data-orden="${data.orden}" data-swap-orden="${items[index+1].orden}">⬇️</button>` : ''}
-                        <button class="btn-borrar" data-id="${data.id}">Borrar</button>
+                        <button class="btn-editar">✏️</button>
+                        <button class="btn-borrar" data-id="${data.id}">🗑️</button>
                     </div>
                 `;
                 contenedor.appendChild(div);
+
+                // Función de Editar Integrada
+                div.querySelector('.btn-editar').addEventListener('click', () => {
+                    if (coleccionStr === 'redes') {
+                        document.getElementById('titulo-red').value = data.titulo || '';
+                        document.getElementById('url-red').value = data.url || '';
+                        document.getElementById('icono-red').value = data.icono || '';
+                        editando.redes = data.id;
+                        document.getElementById('btnGuardarRed').innerText = "Actualizar Red Social";
+                        document.getElementById('btnCancelarRed').style.display = "block";
+                        document.getElementById('seccion-redes').scrollIntoView({ behavior: 'smooth' });
+                    } else if (coleccionStr === 'videos') {
+                        document.getElementById('titulo-video').value = data.titulo || '';
+                        document.getElementById('url-video').value = data.url || '';
+                        document.getElementById('icono-video').value = data.icono || '';
+                        document.getElementById('extra-imagen').value = data.imagen || '';
+                        document.getElementById('extra-lugar').value = data.lugarShow || '';
+                        document.getElementById('extra-direccion').value = data.direccionShow || '';
+                        document.getElementById('extra-fecha').value = data.fechaShow || '';
+                        document.getElementById('extra-hora').value = data.horaShow || '';
+                        editando.videos = data.id;
+                        document.getElementById('btnGuardarVideo').innerText = "Actualizar Enlace";
+                        document.getElementById('btnCancelarVideo').style.display = "block";
+                        document.getElementById('seccion-videos').scrollIntoView({ behavior: 'smooth' });
+                    } else if (coleccionStr === 'qrs') {
+                        document.getElementById('titulo-qr').value = data.titulo || '';
+                        document.getElementById('img-qr').value = data.imagenUrl || '';
+                        document.getElementById('color-qr').value = data.colorClass || '';
+                        editando.qrs = data.id;
+                        document.getElementById('btnGuardarQR').innerText = "Actualizar QR Extra";
+                        document.getElementById('btnCancelarQR').style.display = "block";
+                        document.getElementById('seccion-qrs').scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
             });
 
+            // Función Borrar
             contenedor.querySelectorAll('.btn-borrar').forEach(btn => btn.addEventListener('click', async (e) => {
-                if(confirm("¿Borrar?")) { await deleteDoc(doc(db, coleccionStr, e.target.getAttribute('data-id'))); cargarListas(); }
+                if(confirm("¿Estás seguro de borrar esto de forma permanente?")) { await deleteDoc(doc(db, coleccionStr, e.target.getAttribute('data-id'))); cargarListas(); }
             }));
 
+            // Función Mover
             contenedor.querySelectorAll('.btn-mover').forEach(btn => btn.addEventListener('click', async (e) => {
                 const id1 = e.target.getAttribute('data-id'); const id2 = e.target.getAttribute('data-swap-id');
                 const ord1 = Number(e.target.getAttribute('data-orden')); const ord2 = Number(e.target.getAttribute('data-swap-orden'));
