@@ -73,8 +73,11 @@
                 <option value="fas fa-play-circle">⏯️ Video General</option>
                 <option value="fas fa-star">⭐ Destacado</option>
             </select>
+            
             <p style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">Campos extras solo para Shows:</p>
             <input type="url" id="extra-imagen" placeholder="URL de la Imagen/Afiche del Show">
+            <input type="text" id="extra-lugar" placeholder="Nombre del Lugar (Ej: Restobar El Cohete)">
+            <input type="text" id="extra-direccion" placeholder="Dirección (Ej: Av. Costanera 123, Coquimbo)">
             <input type="text" id="extra-fecha" placeholder="Fecha (Ej: 25 de Julio)">
             <input type="text" id="extra-hora" placeholder="Hora (Ej: 22:00hrs.)">
 
@@ -183,9 +186,11 @@
                     url, 
                     icono: document.getElementById('icono-video').value,
                     imagen: document.getElementById('extra-imagen').value || '',
+                    lugarShow: document.getElementById('extra-lugar').value || '',
+                    direccionShow: document.getElementById('extra-direccion').value || '',
                     fechaShow: document.getElementById('extra-fecha').value || '',
                     horaShow: document.getElementById('extra-hora').value || ''
-                }, ['titulo-video', 'url-video', 'extra-imagen', 'extra-fecha', 'extra-hora']);
+                }, ['titulo-video', 'url-video', 'extra-imagen', 'extra-lugar', 'extra-direccion', 'extra-fecha', 'extra-hora']);
             }
         });
 

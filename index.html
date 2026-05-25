@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carlos - Mis Enlaces</title>
-    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="stylesheet" href="style.css?v=7">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -101,7 +101,7 @@
             } else { titulo.style.display = 'none'; }
         }
 
-        // Función especial para Renderizar Tarjetas de Eventos Completa
+        // Función de Tarjetas con Lugar y Dirección Añadidos
         function dibujarShows(items, contenedorId, tituloId) {
             const contenedor = document.getElementById(contenedorId);
             const titulo = document.getElementById(tituloId);
@@ -115,6 +115,8 @@
                         ${data.imagen ? `<img src="${data.imagen}" alt="${data.titulo}" class="event-img">` : ''}
                         <div class="event-info">
                             <div class="event-title">${data.titulo}</div>
+                            ${data.lugarShow ? `<div class="event-detail"><i class="fas fa-map-marker-alt"></i> <b>Lugar:</b> ${data.lugarShow}</div>` : ''}
+                            ${data.direccionShow ? `<div class="event-detail"><i class="fas fa-location-arrow"></i> <b>Dirección:</b> ${data.direccionShow}</div>` : ''}
                             ${data.fechaShow ? `<div class="event-detail"><i class="fas fa-calendar-alt"></i> <b>Fecha:</b> ${data.fechaShow}</div>` : ''}
                             ${data.horaShow ? `<div class="event-detail"><i class="fas fa-clock"></i> <b>Hora:</b> ${data.horaShow}</div>` : ''}
                             <a href="${data.url}" target="_blank" class="event-btn"><i class="fas fa-ticket-alt"></i> Entradas</a>
@@ -138,7 +140,7 @@
 
                 dibujarBotones(destacados, 'contenedor-destacado', 'titulo-destacado', '2px solid #FFD700'); 
                 dibujarBotones(youtube, 'contenedor-youtube', 'titulo-youtube', '2px solid #FF0000'); 
-                dibujarShows(shows, 'contenedor-shows', 'titulo-shows'); // Llama al layout de tarjeta pro
+                dibujarShows(shows, 'contenedor-shows', 'titulo-shows'); 
                 dibujarBotones(videosGen, 'contenedor-videosgen', 'titulo-videosgen', '2px solid #555'); 
 
                 const qrsItems = await fetchAndSort("qrs");
