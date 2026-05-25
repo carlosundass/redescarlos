@@ -17,7 +17,6 @@
         .btn-perfil { background: #1e88e5; } .btn-perfil:hover { background: #1565c0; }
         h2 { margin-top: 0; text-align: center; font-size: 1.3rem; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 20px; }
         #admin-panel { display: none; width: 100%; max-width: 500px; }
-        
         .item-lista { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
         .item-lista span { display: flex; align-items: center; gap: 8px; font-weight: 500;}
         .controles-lista { display: flex; gap: 5px; }
@@ -27,7 +26,6 @@
         .btn-borrar:hover { background: #cc0000; }
         .contenedor-lista { margin-top: 20px; border-top: 2px dashed #eee; padding-top: 15px; }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
@@ -40,7 +38,6 @@
 
     <div id="admin-panel">
         
-        <!-- Perfil Principal -->
         <div class="card">
             <h2>👤 Perfil Principal</h2>
             <input type="url" id="img-perfil" placeholder="URL de tu Foto (Ej: https://...)">
@@ -49,7 +46,6 @@
             <button id="btnGuardarPerfil" class="btn-perfil">Actualizar Perfil</button>
         </div>
 
-        <!-- Redes Sociales -->
         <div class="card">
             <h2>📱 Redes Sociales</h2>
             <input type="text" id="titulo-red" placeholder="Título (Ej: Mi Instagram)">
@@ -59,48 +55,43 @@
                 <option value="fab fa-tiktok">🎵 TikTok</option>
                 <option value="fab fa-youtube">▶️ YouTube</option>
                 <option value="fab fa-spotify">🎧 Spotify</option>
-                <option value="fab fa-facebook">📘 Facebook</option>
-                <option value="fab fa-twitter">🐦 Twitter / X</option>
                 <option value="fab fa-whatsapp">💬 WhatsApp</option>
                 <option value="fas fa-podcast">🎙️ Podcast</option>
                 <option value="fas fa-globe">🌐 Sitio Web</option>
-                <option value="fas fa-camera">📷 Fotografía</option>
             </select>
             <button id="btnGuardarRed">Guardar Red Social</button>
             <div class="contenedor-lista" id="lista-redes"></div>
         </div>
 
-        <!-- Recomendados (Youtube, Entradas, etc) -->
         <div class="card">
             <h2>🎬 Categorías (Videos, Shows)</h2>
-            <input type="text" id="titulo-video" placeholder="Título (Ej: Show en Vivo)">
-            <input type="url" id="url-video" placeholder="URL del video o evento">
+            <input type="text" id="titulo-video" placeholder="Título (Ej: Show en Coquimbo)">
+            <input type="url" id="url-video" placeholder="URL de compra o video">
             <select id="icono-video">
-                <option value="fab fa-youtube">▶️ YouTube</option>
                 <option value="fas fa-ticket-alt">🎫 Entradas / Show</option>
+                <option value="fab fa-youtube">▶️ YouTube</option>
                 <option value="fas fa-play-circle">⏯️ Video General</option>
                 <option value="fas fa-star">⭐ Destacado</option>
             </select>
+            <p style="font-size: 0.8rem; color: #666; margin-bottom: 5px; font-weight: 600;">Campos extras solo para Shows:</p>
+            <input type="url" id="extra-imagen" placeholder="URL de la Imagen/Afiche del Show">
+            <input type="text" id="extra-fecha" placeholder="Fecha (Ej: 25 de Julio)">
+            <input type="text" id="extra-hora" placeholder="Hora (Ej: 22:00hrs.)">
+
             <button id="btnGuardarVideo" class="btn-red">Guardar Enlace</button>
             <div class="contenedor-lista" id="lista-videos"></div>
         </div>
 
-        <!-- QRs -->
         <div class="card">
             <h2>🔳 Códigos QR Adicionales</h2>
             <select id="color-qr">
                 <option value="title-ig">Color Instagram (Rosa)</option>
                 <option value="title-tk">Color TikTok (Negro)</option>
                 <option value="title-yt">Color YouTube (Rojo)</option>
-                <option value="title-pd">Color Podcast (Morado)</option>
             </select>
-            <input type="text" id="titulo-qr" placeholder="Título (Ej: Escanea mi Spotify)">
-            <select id="icono-qr">
-                <option value="fab fa-spotify">🎧 Spotify</option>
-                <option value="fas fa-link">🔗 Enlace Genérico</option>
-                <option value="fab fa-whatsapp">💬 WhatsApp</option>
-            </select>
-            <input type="url" id="img-qr" placeholder="URL de la imagen del QR">
+            <input type="text" id="titulo-qr" placeholder="Título">
+            <select id="icono-qr"><option value="fas fa-link">🔗 Enlace Genérico</option></select>
+            <input type="url" id="img-qr" placeholder="URL del QR">
             <button id="btnGuardarQR" class="btn-qr">Guardar QR Extra</button>
             <div class="contenedor-lista" id="lista-qrs"></div>
         </div>
@@ -128,18 +119,14 @@
         const db = getFirestore(app);
 
         document.getElementById('btnLogin').addEventListener('click', () => {
-            signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value)
-                .catch(() => alert("Error en credenciales"));
+            signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value).catch(() => alert("Error"));
         });
         document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
 
         onAuthStateChanged(auth, (user) => {
             document.getElementById('login-box').style.display = user ? 'none' : 'block';
             document.getElementById('admin-panel').style.display = user ? 'block' : 'none';
-            if(user) {
-                cargarListas(); 
-                cargarPerfilAdmin();
-            }
+            if(user) { cargarListas(); cargarPerfilAdmin(); }
         });
 
         async function cargarPerfilAdmin() {
@@ -153,14 +140,12 @@
         }
 
         document.getElementById('btnGuardarPerfil').addEventListener('click', async () => {
-            try {
-                await setDoc(doc(db, "configuracion", "perfil"), {
-                    foto: document.getElementById('img-perfil').value,
-                    nombre: document.getElementById('nombre-perfil').value,
-                    descripcion: document.getElementById('desc-perfil').value
-                });
-                alert("¡Perfil actualizado con éxito!");
-            } catch (error) { alert("Error al guardar el perfil."); }
+            await setDoc(doc(db, "configuracion", "perfil"), {
+                foto: document.getElementById('img-perfil').value,
+                nombre: document.getElementById('nombre-perfil').value,
+                descripcion: document.getElementById('desc-perfil').value
+            });
+            alert("¡Perfil guardado!");
         });
 
         async function fetchAndSort(coleccionStr) {
@@ -180,7 +165,7 @@
                 await addDoc(collection(db, coleccionStr), data);
                 inputsLimpiar.forEach(id => document.getElementById(id).value = '');
                 cargarListas(); 
-            } catch (e) { alert("Error al guardar."); }
+            } catch (e) { alert("Error"); }
         }
 
         document.getElementById('btnGuardarRed').addEventListener('click', () => {
@@ -192,13 +177,22 @@
         document.getElementById('btnGuardarVideo').addEventListener('click', () => {
             const titulo = document.getElementById('titulo-video').value;
             const url = document.getElementById('url-video').value;
-            if(titulo && url) guardarDato("videos", { titulo, url, icono: document.getElementById('icono-video').value }, ['titulo-video', 'url-video']);
+            if(titulo && url) {
+                guardarDato("videos", { 
+                    titulo, 
+                    url, 
+                    icono: document.getElementById('icono-video').value,
+                    imagen: document.getElementById('extra-imagen').value || '',
+                    fechaShow: document.getElementById('extra-fecha').value || '',
+                    horaShow: document.getElementById('extra-hora').value || ''
+                }, ['titulo-video', 'url-video', 'extra-imagen', 'extra-fecha', 'extra-hora']);
+            }
         });
 
         document.getElementById('btnGuardarQR').addEventListener('click', () => {
             const titulo = document.getElementById('titulo-qr').value;
             const imagenUrl = document.getElementById('img-qr').value;
-            if(titulo && imagenUrl) guardarDato("qrs", { titulo, imagenUrl, colorClass: document.getElementById('color-qr').value, icono: document.getElementById('icono-qr').value }, ['titulo-qr', 'img-qr']);
+            if(titulo && imagenUrl) guardarDato("qrs", { titulo, imagenUrl, colorClass: document.getElementById('color-qr').value, icono: 'fas fa-link' }, ['titulo-qr', 'img-qr']);
         });
 
         async function cargarListas() {
@@ -214,7 +208,7 @@
                 const div = document.createElement('div');
                 div.className = 'item-lista';
                 div.innerHTML = `
-                    <span><i class="${data.icono}"></i> ${data.titulo}</span>
+                    <span>${data.titulo}</span>
                     <div class="controles-lista">
                         ${index > 0 ? `<button class="btn-mover" data-id="${data.id}" data-swap-id="${items[index-1].id}" data-orden="${data.orden}" data-swap-orden="${items[index-1].orden}">⬆️</button>` : ''}
                         ${index < items.length - 1 ? `<button class="btn-mover" data-id="${data.id}" data-swap-id="${items[index+1].id}" data-orden="${data.orden}" data-swap-orden="${items[index+1].orden}">⬇️</button>` : ''}
@@ -224,27 +218,16 @@
                 contenedor.appendChild(div);
             });
 
-            contenedor.querySelectorAll('.btn-borrar').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const id = e.target.getAttribute('data-id');
-                    if(confirm("¿Seguro que quieres borrar este elemento?")) {
-                        await deleteDoc(doc(db, coleccionStr, id));
-                        cargarListas(); 
-                    }
-                });
-            });
+            contenedor.querySelectorAll('.btn-borrar').forEach(btn => btn.addEventListener('click', async (e) => {
+                if(confirm("¿Borrar?")) { await deleteDoc(doc(db, coleccionStr, e.target.getAttribute('data-id'))); cargarListas(); }
+            }));
 
-            contenedor.querySelectorAll('.btn-mover').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const id1 = e.target.getAttribute('data-id');
-                    const id2 = e.target.getAttribute('data-swap-id');
-                    const ord1 = Number(e.target.getAttribute('data-orden'));
-                    const ord2 = Number(e.target.getAttribute('data-swap-orden'));
-                    await updateDoc(doc(db, coleccionStr, id1), { orden: ord2 });
-                    await updateDoc(doc(db, coleccionStr, id2), { orden: ord1 });
-                    cargarListas();
-                });
-            });
+            contenedor.querySelectorAll('.btn-mover').forEach(btn => btn.addEventListener('click', async (e) => {
+                const id1 = e.target.getAttribute('data-id'); const id2 = e.target.getAttribute('data-swap-id');
+                const ord1 = Number(e.target.getAttribute('data-orden')); const ord2 = Number(e.target.getAttribute('data-swap-orden'));
+                await updateDoc(doc(db, coleccionStr, id1), { orden: ord2 }); await updateDoc(doc(db, coleccionStr, id2), { orden: ord1 });
+                cargarListas();
+            }));
         }
     </script>
 </body>

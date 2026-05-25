@@ -4,18 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carlos - Mis Enlaces</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=6">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
     <div class="container">
-        <!-- Elementos del perfil Dinámicos -->
         <img src="carlosundaprofile.jpg" alt="Foto de Perfil" class="profile-pic" id="display-foto">
         <h1 id="display-nombre">Carlos</h1>
         <p id="display-desc">Comediante, Creador de Contenido y Productor Audiovisual</p>
 
-        <!-- Slider de QR -->
         <div class="qr-slider-container" id="contenedor-slider-general">
             <h2>Escanea y Sígueme</h2>
             <div class="qr-slider-viewport">
@@ -27,23 +25,18 @@
             </div>
         </div>
 
-        <!-- SECCIÓN 1: REDES SOCIALES -->
         <h2 id="titulo-redes" class="seccion-titulo">Redes Sociales</h2>
         <div class="links" id="contenedor-redes" style="margin-bottom: 15px;"></div>
 
-        <!-- SECCIÓN 2: DESTACADOS -->
         <h2 id="titulo-destacado" class="seccion-titulo">⭐ Destacado</h2>
         <div class="links" id="contenedor-destacado" style="margin-bottom: 15px;"></div>
 
-        <!-- SECCIÓN 3: YOUTUBE -->
         <h2 id="titulo-youtube" class="seccion-titulo">▶️ YouTube</h2>
         <div class="links" id="contenedor-youtube" style="margin-bottom: 15px;"></div>
 
-        <!-- SECCIÓN 4: ENTRADAS / SHOWS -->
         <h2 id="titulo-shows" class="seccion-titulo">🎫 Shows y Entradas</h2>
         <div class="links" id="contenedor-shows" style="margin-bottom: 15px;"></div>
 
-        <!-- SECCIÓN 5: OTROS VIDEOS -->
         <h2 id="titulo-videosgen" class="seccion-titulo">⏯️ Videos</h2>
         <div class="links" id="contenedor-videosgen" style="margin-bottom: 15px;"></div>
 
@@ -79,7 +72,7 @@
                     if(data.nombre) document.getElementById('display-nombre').innerText = data.nombre;
                     if(data.descripcion) document.getElementById('display-desc').innerText = data.descripcion;
                 }
-            } catch (error) { console.error("Error cargando perfil:", error); }
+            } catch (error) { console.error(error); }
         }
 
         async function fetchAndSort(coleccionStr) {
@@ -93,7 +86,6 @@
         function dibujarBotones(items, contenedorId, tituloId, estiloExtra = "") {
             const contenedor = document.getElementById(contenedorId);
             const titulo = document.getElementById(tituloId);
-            
             if (items.length > 0) {
                 titulo.style.display = 'block'; 
                 contenedor.innerHTML = ''; 
@@ -106,34 +98,49 @@
                     boton.innerHTML = `<i class="${data.icono}"></i> ${data.titulo}`;
                     contenedor.appendChild(boton);
                 });
-            } else {
-                titulo.style.display = 'none'; 
-            }
+            } else { titulo.style.display = 'none'; }
+        }
+
+        // Función especial para Renderizar Tarjetas de Eventos Completa
+        function dibujarShows(items, contenedorId, tituloId) {
+            const contenedor = document.getElementById(contenedorId);
+            const titulo = document.getElementById(tituloId);
+            if (items.length > 0) {
+                titulo.style.display = 'block'; 
+                contenedor.innerHTML = ''; 
+                items.forEach((data) => {
+                    const card = document.createElement('div');
+                    card.className = 'event-card';
+                    card.innerHTML = `
+                        ${data.imagen ? `<img src="${data.imagen}" alt="${data.titulo}" class="event-img">` : ''}
+                        <div class="event-info">
+                            <div class="event-title">${data.titulo}</div>
+                            ${data.fechaShow ? `<div class="event-detail"><i class="fas fa-calendar-alt"></i> <b>Fecha:</b> ${data.fechaShow}</div>` : ''}
+                            ${data.horaShow ? `<div class="event-detail"><i class="fas fa-clock"></i> <b>Hora:</b> ${data.horaShow}</div>` : ''}
+                            <a href="${data.url}" target="_blank" class="event-btn"><i class="fas fa-ticket-alt"></i> Entradas</a>
+                        </div>
+                    `;
+                    contenedor.appendChild(card);
+                });
+            } else { titulo.style.display = 'none'; }
         }
 
         async function cargarTodo() {
             await cargarPerfil(); 
-
             try {
-                // 1. Cargar Redes Normales
-                const redes = await fetchAndSort("redes");
-                dibujarBotones(redes, 'contenedor-redes', 'titulo-redes');
+                dibujarBotones(await fetchAndSort("redes"), 'contenedor-redes', 'titulo-redes');
 
-                // 2. Traer todos los Recomendados y FILTRARLOS por su ícono
                 const recomendadosFull = await fetchAndSort("videos");
-                
                 const destacados = recomendadosFull.filter(v => v.icono === "fas fa-star");
                 const youtube = recomendadosFull.filter(v => v.icono === "fab fa-youtube");
                 const shows = recomendadosFull.filter(v => v.icono === "fas fa-ticket-alt");
                 const videosGen = recomendadosFull.filter(v => v.icono === "fas fa-play-circle");
 
-                // Dibujar cada categoría
-                dibujarBotones(destacados, 'contenedor-destacado', 'titulo-destacado', '2px solid #FFD700'); // Borde Dorado
-                dibujarBotones(youtube, 'contenedor-youtube', 'titulo-youtube', '2px solid #FF0000'); // Borde Rojo
-                dibujarBotones(shows, 'contenedor-shows', 'titulo-shows', '2px solid #1e88e5'); // Borde Azul
-                dibujarBotones(videosGen, 'contenedor-videosgen', 'titulo-videosgen', '2px solid #555'); // Borde Gris
+                dibujarBotones(destacados, 'contenedor-destacado', 'titulo-destacado', '2px solid #FFD700'); 
+                dibujarBotones(youtube, 'contenedor-youtube', 'titulo-youtube', '2px solid #FF0000'); 
+                dibujarShows(shows, 'contenedor-shows', 'titulo-shows'); // Llama al layout de tarjeta pro
+                dibujarBotones(videosGen, 'contenedor-videosgen', 'titulo-videosgen', '2px solid #555'); 
 
-                // 3. Cargar QRs Dinámicos al Slider
                 const qrsItems = await fetchAndSort("qrs");
                 const track = document.getElementById('sliderTrack');
                 if(qrsItems.length > 0) {
@@ -145,7 +152,6 @@
                     });
                 }
 
-                // 4. Iniciar Animación
                 const slides = document.querySelectorAll('.slide');
                 let currentIndex = 0;
                 setInterval(() => {
@@ -153,12 +159,8 @@
                     if (currentIndex >= slides.length) currentIndex = 0; 
                     track.style.transform = `translateX(-${currentIndex * 100}%)`;
                 }, 3500);
-
-            } catch (error) {
-                console.error("Error:", error);
-            }
+            } catch (error) { console.error("Error:", error); }
         }
-
         cargarTodo();
     </script>
 </body>

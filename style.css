@@ -25,6 +25,9 @@ body {
     width: 100%;
     max-width: 450px;
     flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .profile-pic {
@@ -70,7 +73,7 @@ p {
 }
 
 /* =========================================
-   2. ESTILOS DEL SLIDER QR (Para Carlos)
+   2. ESTILOS DEL SLIDER QR
 ========================================= */
 .qr-slider-container {
     background-color: #fff;
@@ -79,6 +82,7 @@ p {
     margin-bottom: 30px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.08);
     text-align: center;
+    width: 100%;
 }
 
 .qr-slider-container h2 {
@@ -138,18 +142,14 @@ p {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.qr-code:hover {
-    transform: scale(1.08);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-}
-
 /* =========================================
-   3. ESTILOS DE LOS BOTONES
+   3. ESTILOS DE LOS BOTONES Y ENLACES
 ========================================= */
 .links {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    width: 100%;
 }
 
 .btn {
@@ -176,9 +176,7 @@ p {
     box-shadow: 0 8px 15px rgba(0,0,0,0.15);
 }
 
-.btn i {
-    font-size: 1.3rem;
-}
+.btn i { font-size: 1.3rem; }
 
 footer {
     margin-top: 40px;
@@ -187,52 +185,82 @@ footer {
 }
 
 /* =========================================
-   4. ESTILOS GRID DE QR (Para Claudia)
+   4. NUEVO: DISEÑO TARJETA DE SHOWS PRO
 ========================================= */
-.qr-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    padding-top: 10px;
-}
-
-.qr-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-/* Enlace del QR */
-.qr-link {
-    text-decoration: none;
-    color: inherit;
-    transition: opacity 0.3s ease;
-}
-
-.qr-link:hover {
-    opacity: 0.7;
-}
-
-.qr-item h3 {
-    font-size: 0.95rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 5px;
-    font-weight: 600;
-}
-
-.qr-item .qr-code {
+.event-card {
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     width: 100%;
-    max-width: 160px;
-    height: auto;
+    margin-bottom: 20px;
+    border: 2px solid #1e88e5;
+    text-align: left;
 }
 
-/* Mobile en fila hacia abajo */
-@media (max-width: 480px) {
-    .qr-grid {
-        grid-template-columns: 1fr;
-    }
+.event-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
 }
+
+.event-info {
+    padding: 20px;
+}
+
+.event-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+.event-detail {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.event-detail i {
+    color: #1e88e5;
+    width: 16px;
+}
+
+.event-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #1e88e5;
+    color: #fff;
+    text-decoration: none;
+    padding: 14px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-top: 15px;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(30,136,229,0.2);
+}
+
+.event-btn:hover {
+    background: #1565c0;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(30,136,229,0.3);
+}
+
+/* GRID DE QR (Para Claudia) */
+.qr-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; padding-top: 10px; }
+.qr-item { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.qr-link { text-decoration: none; color: inherit; transition: opacity 0.3s ease; }
+.qr-link:hover { opacity: 0.7; }
+.qr-item h3 { font-size: 0.95rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 5px; font-weight: 600; }
+.qr-item .qr-code { width: 100%; max-width: 160px; height: auto; }
+@media (max-width: 480px) { .qr-grid { grid-template-columns: 1fr; } }
