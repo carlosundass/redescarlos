@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carlos - Mis Enlaces</title>
-    <link rel="stylesheet" href="style.css?v=7">
+    <link rel="stylesheet" href="style.css?v=9">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -43,7 +43,7 @@
     </div>
 
     <footer>
-        <p>&copy; 2026 Carlos. Todos los derechos reservados.</p>
+        <p>© 2026 Carlos. Todos los derechos reservados.</p>
     </footer>
 
     <script type="module">
@@ -83,6 +83,16 @@
             return items;
         }
 
+        function formatearFecha(fechaStr) {
+            if (!fechaStr) return '';
+            if (fechaStr.includes('-')) {
+                const [year, month, day] = fechaStr.split('-');
+                const fechaObj = new Date(year, month - 1, day);
+                return fechaObj.toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
+            }
+            return fechaStr;
+        }
+
         function dibujarBotones(items, contenedorId, tituloId, estiloExtra = "") {
             const contenedor = document.getElementById(contenedorId);
             const titulo = document.getElementById(tituloId);
@@ -111,16 +121,14 @@
                     const card = document.createElement('div');
                     card.className = 'event-card';
                     
-                    // Creamos el enlace seguro para Google Maps combinando dirección y lugar
-                    const busquedaMapa = encodeURIComponent(`${data.direccionShow} ${data.lugarShow || ''}`);
-                    const urlMapa = `https://www.google.com/maps/search/?api=1&query=${busquedaMapa}`;
+                    const busquedaMapa = encodeURIComponent(`${data.direccionShow || ''} ${data.lugarShow || ''}`);
+                    const urlMapa = `https://maps.google.com/?q=${busquedaMapa}`;
 
                     card.innerHTML = `
                         ${data.imagen ? `<img src="${data.imagen}" alt="${data.titulo}" class="event-img">` : ''}
                         <div class="event-info">
                             <div class="event-title">${data.titulo}</div>
                             ${data.lugarShow ? `<div class="event-detail"><i class="fas fa-map-marker-alt"></i> <b>Lugar:</b> ${data.lugarShow}</div>` : ''}
-                            
                             ${data.direccionShow ? `
                                 <div class="event-detail">
                                     <i class="fas fa-location-arrow"></i> 
@@ -129,8 +137,7 @@
                                         ${data.direccionShow} <i class="fas fa-external-link-alt" style="font-size: 0.75rem; color: #1e88e5; margin-left: 2px;"></i>
                                     </a>
                                 </div>` : ''}
-                            
-                            ${data.fechaShow ? `<div class="event-detail"><i class="fas fa-calendar-alt"></i> <b>Fecha:</b> ${data.fechaShow}</div>` : ''}
+                            ${data.fechaShow ? `<div class="event-detail"><i class="fas fa-calendar-alt"></i> <b>Fecha:</b> ${formatearFecha(data.fechaShow)}</div>` : ''}
                             ${data.horaShow ? `<div class="event-detail"><i class="fas fa-clock"></i> <b>Hora:</b> ${data.horaShow}</div>` : ''}
                             <a href="${data.url}" target="_blank" class="event-btn"><i class="fas fa-ticket-alt"></i> Entradas</a>
                         </div>
@@ -148,8 +155,15 @@
                 const recomendadosFull = await fetchAndSort("videos");
                 const destacados = recomendadosFull.filter(v => v.icono === "fas fa-star");
                 const youtube = recomendadosFull.filter(v => v.icono === "fab fa-youtube");
-                const shows = recomendadosFull.filter(v => v.icono === "fas fa-ticket-alt");
+                let shows = recomendadosFull.filter(v => v.icono === "fas fa-ticket-alt");
                 const videosGen = recomendadosFull.filter(v => v.icono === "fas fa-play-circle");
+
+                // CORREGIDO: Ordenamiento cronológico de texto puro (Más cercano arriba, vacíos al fondo)
+                shows.sort((a, b) => {
+                    const deA = a.fechaShow || '9999-12-31';
+                    const deB = b.fechaShow || '9999-12-31';
+                    return deA.localeCompare(deB);
+                });
 
                 dibujarBotones(destacados, 'contenedor-destacado', 'titulo-destacado', '2px solid #FFD700'); 
                 dibujarBotones(youtube, 'contenedor-youtube', 'titulo-youtube', '2px solid #FF0000'); 
